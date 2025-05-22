@@ -54,33 +54,46 @@ export function ChatContainer({ messages, onSend, loading }: ChatProps) {
 
   return (
     <div className="flex h-full w-full flex-col overflow-hidden border">
+      <div id="tab-header" className="w-full basis-1/14 bg-red-400"></div>
+
       {/* 消息区 - 可滚动 */}
-      <div className="flex-1 basis-5/6 overflow-y-auto bg-gray-100 p-6">
-        <ChatMessages messages={messages} />
-        <div ref={messagesEndRef} />
+      <div id="message-select" className="w-full basis-10/14 bg-blue-400">
+        <div className="flex-1 basis-5/6 overflow-y-auto p-6">
+          <ChatMessages messages={messages} />
+          <div ref={messagesEndRef} />
+        </div>
       </div>
 
       {/* 输入栏 - 固定底部 */}
-      <div className="bg-background flex flex-none basis-1/6 flex-col justify-end rounded-3xl border">
-        <div className="m-2">
-          <div className="flex flex-row">
-            <div
-              contentEditable="true"
-              className="min-h-12 w-full rounded-lg border border-none p-4 empty:before:text-gray-400 empty:before:content-[attr(data-placeholder)] focus:outline-none"
-              id="editor"
-              data-placeholder="请输入..."
-            ></div>
-          </div>
-          <div className="flex w-full flex-row items-center justify-between">
-            <div>
-              <Button variant="ghost" className="h-10 w-10 rounded-full p-0">
-                工具
-              </Button>
+      <div id="chat-bootom" className="flex w-full basis-3/14 flex-col bg-green-400">
+        <div className="flex w-full basis-4/5 items-center justify-center">
+          <div className="flex w-full max-w-[567px] min-w-[134px]">
+            <div className="bg-background flex max-w-full flex-1 flex-col justify-end rounded-3xl border">
+              <div className="m-2">
+                <div className="flex flex-row">
+                  <div
+                    contentEditable="true"
+                    className="custom-scrollbar max-h-[150px] min-h-12 w-full rounded-lg border border-none p-4 empty:before:text-gray-400 empty:before:content-[attr(data-placeholder)] focus:outline-none"
+                    id="editor"
+                    data-placeholder="请输入..."
+                  ></div>
+                </div>
+                <div className="flex w-full flex-row items-center justify-between">
+                  <div>
+                    <Button variant="ghost" className="h-10 w-10 rounded-full p-0">
+                      工具
+                    </Button>
+                  </div>
+                  <div>
+                    <Button className="h-10 w-10 rounded-full p-0">发送</Button>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div>
-              <Button className="h-10 w-10 rounded-full p-0">发送</Button>
-            </div>
           </div>
+        </div>
+        <div className="flex w-full basis-1/5 items-center justify-center text-center text-xs">
+          <p>模型也可能会犯错，请核查重要信息</p>
         </div>
       </div>
     </div>

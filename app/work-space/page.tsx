@@ -28,7 +28,7 @@ export default function ResizablePanels() {
       className="h-screen"
     >
       <ResizablePanel defaultSize={35}>
-        <div className="flex h-full items-center justify-center p-6">
+        <div className="flex h-full items-center justify-center">
           {/* <span className="font-semibold">Sidebar</span>
            */}
            <ChatContainer messages={[]} onSend={() => {}} />
@@ -36,7 +36,7 @@ export default function ResizablePanels() {
       </ResizablePanel>
       <ResizableHandle withHandle />
       <ResizablePanel defaultSize={65}>
-        <div className="flex h-full items-center justify-center p-6">
+        <div className="flex h-full items-center justify-center">
           <span className="font-semibold">Content</span>
         </div>
       </ResizablePanel>
