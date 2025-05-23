@@ -18,6 +18,7 @@ import {
   MicIcon,
   Wand2Icon,
 } from 'lucide-react';
+import { UserMessageItem } from './userMessageItem';
 
 // 你可以这样定义消息类型
 type Message = {
@@ -57,11 +58,10 @@ export function ChatContainer({ messages, onSend, loading }: ChatProps) {
       <div id="tab-header" className="w-full basis-1/14 bg-red-400"></div>
 
       {/* 消息区 - 可滚动 */}
-      <div id="message-select" className="w-full basis-10/14 bg-blue-400">
-        <div className="flex-1 basis-5/6 overflow-y-auto p-6">
-          <ChatMessages messages={messages} />
-          <div ref={messagesEndRef} />
-        </div>
+      <div className="flex-1 basis-5/6 overflow-y-auto bg-gray-100 p-6">
+        {/* <ChatMessages messages={messages} />
+        <div ref={messagesEndRef} /> */}
+        <UserMessageItem />
       </div>
 
       {/* 输入栏 - 固定底部 */}
