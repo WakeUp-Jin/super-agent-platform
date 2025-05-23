@@ -74,12 +74,16 @@ export function ChatContainer({ messages, onSend, loading }: ChatProps) {
       {/* 消息区 - 可滚动 */}
       <div className="flex flex-1 basis-5/6 items-center justify-center overflow-y-auto">
         <ScrollArea className="h-full w-full">
-          <div className="h-full max-w-[567px] min-w-[134px] flex-1 space-y-3 overflow-y-auto p-6">
-            {/* <ChatMessages messages={messages} />
-        <div ref={messagesEndRef} /> */}
-            <UserMessageItem content="很长很长很长很长很长很长的文字，如果文字超出了最大宽度就会自动换行，没有最大高度限制，能一直往下撑开……" />
-            <AssistantMessage content={aiMessage} />
-            <UserMessageItem content="很长很长很长很长很长很长的文字，如果文字超出了最大宽度就会自动换行，没有最大高度限制，能一直往下撑开……" />
+          <div className="flex items-center justify-center">
+            <div className="h-full max-w-[567px] min-w-[134px] flex-1 space-y-3 overflow-y-auto">
+              <ChatMessages messages={messages} />
+              {/* <div ref={messagesEndRef} /> */}
+
+              {/* <UserMessageItem content="很长很长很长很长很长很长的文字，如果文字超出了最大宽度就会自动换行，没有最大高度限制，能一直往下撑开……" />
+              <AssistantMessage content={aiMessage} />
+              <UserMessageItem content="很长很长很长很长很长很长的文字，如果文字超出了最大宽度就会自动换行，没有最大高度限制，能一直往下撑开……" />
+             */}
+            </div>
           </div>
         </ScrollArea>
       </div>
@@ -123,7 +127,7 @@ export function ChatContainer({ messages, onSend, loading }: ChatProps) {
 // 单条消息
 function ChatMessages({ messages }: { messages: Message[] }) {
   return (
-    <div className="flex flex-col gap-4">
+    <div>
       {messages.map((msg) => (
         <ChatMessageItem key={msg.id} {...msg} />
       ))}
@@ -135,47 +139,6 @@ function ChatMessages({ messages }: { messages: Message[] }) {
 function ChatMessageItem({ role, content }: Message) {
   const isUser = role === 'user';
   return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
-      {/* 用户消息右对齐，助手消息左对齐 */}
-      {!isUser && (
-        <div className="mr-2 flex items-end">
-          <BotIcon className="text-muted-foreground h-7 w-7" />
-        </div>
-      )}
-      <div
-        className={`relative max-w-[70%] rounded-2xl px-4 py-2 ${
-          isUser
-            ? 'bg-primary text-primary-foreground rounded-br-md'
-            : 'text-foreground rounded-bl-md border bg-white'
-        } shadow`}
-      >
-        <span className="whitespace-pre-wrap">{content}</span>
-        <div className="absolute -bottom-7 left-2 flex gap-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-6 w-6 p-0">
-                <CopyIcon className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>复制</TooltipContent>
-          </Tooltip>
-          {!isUser && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-6 w-6 p-0">
-                  <RefreshCwIcon className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>重新生成</TooltipContent>
-            </Tooltip>
-          )}
-        </div>
-      </div>
-      {isUser && (
-        <div className="ml-2 flex items-end">
-          <UserIcon className="text-muted-foreground h-7 w-7" />
-        </div>
-      )}
-    </div>
+    <>{isUser ? <UserMessageItem content={content} /> : <AssistantMessage content={content} />}</>
   );
 }
