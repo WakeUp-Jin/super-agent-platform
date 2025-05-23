@@ -17,10 +17,14 @@ import {
   Settings2Icon,
   MicIcon,
   Wand2Icon,
+  EllipsisVertical,
+  Columns2,
+  SquarePen,
 } from 'lucide-react';
 import { UserMessageItem } from './UserMessageItem';
 import { AssistantMessage } from './AssistantMessage';
 import { ScrollArea } from '../ui/scroll-area';
+import { Toggle } from '@radix-ui/react-toggle';
 
 // 你可以这样定义消息类型
 type Message = {
@@ -55,21 +59,34 @@ export function ChatContainer({ messages, onSend, loading }: ChatProps) {
     }
   }
 
-  // let aiMessage = `## Overview \n * Follows [CommonMark](https://commonmark.org) \n * Optionally follows [GitHub Flavored Markdown](https://github.github.com/gfm/) \n * Renders actual React elements instead of using \`dangerouslySetInnerHTML\` \n * Lets you define your own components (to render \`MyHeading\` instead of \`'h1'\`) \n * Has a lot of plugins`;
-
-  let aiMessage = `
- ## Overview
-
-* Follows [CommonMark](https://commonmark.org)
-* Optionally follows [GitHub Flavored Markdown](https://github.github.com/gfm/)
-* Renders actual React elements instead of using \`dangerouslySetInnerHTML\`
-* Lets you define your own components (to render \`MyHeading\` instead of \`'h1'\`)
-* Has a lot of plugins
-  `;
-
   return (
     <div className="flex h-full w-full flex-col overflow-hidden border">
-      <div id="tab-header" className="w-full basis-1/14 bg-red-400"></div>
+      <div id="tab-header" className="flex w-full basis-1/14 items-center justify-between p-2">
+        <div className="flex gap-3">
+          <div className="flex gap-3">
+            <Toggle
+              className="cursor-pointer border-none px-2 hover:bg-gray-200"
+              aria-label="Toggle columns"
+            >
+              <Columns2></Columns2>
+            </Toggle>
+            <Toggle
+              aria-label="Toggle square pen"
+              className="cursor-pointer border-none px-2 hover:bg-gray-200"
+            >
+              <SquarePen></SquarePen>
+            </Toggle>
+          </div>
+          <Button variant="ghost" className="cursor-pointer text-lg">
+            WakeUp 3.0
+          </Button>
+        </div>
+        <div className="flex items-center pr-3">
+          <Button variant="ghost" className="cursor-pointer rounded-full py-0">
+            <EllipsisVertical className="size-5" />
+          </Button>
+        </div>
+      </div>
 
       {/* 消息区 - 可滚动 */}
       <div className="flex flex-1 basis-5/6 items-center justify-center overflow-y-auto">
