@@ -18,7 +18,9 @@ import {
   MicIcon,
   Wand2Icon,
 } from 'lucide-react';
-import { UserMessageItem } from './userMessageItem';
+import { UserMessageItem } from './UserMessageItem';
+import { AssistantMessage } from './AssistantMessage';
+import { ScrollArea } from '../ui/scroll-area';
 
 // 你可以这样定义消息类型
 type Message = {
@@ -53,19 +55,37 @@ export function ChatContainer({ messages, onSend, loading }: ChatProps) {
     }
   }
 
+  // let aiMessage = `## Overview \n * Follows [CommonMark](https://commonmark.org) \n * Optionally follows [GitHub Flavored Markdown](https://github.github.com/gfm/) \n * Renders actual React elements instead of using \`dangerouslySetInnerHTML\` \n * Lets you define your own components (to render \`MyHeading\` instead of \`'h1'\`) \n * Has a lot of plugins`;
+
+  let aiMessage = `
+ ## Overview
+
+* Follows [CommonMark](https://commonmark.org)
+* Optionally follows [GitHub Flavored Markdown](https://github.github.com/gfm/)
+* Renders actual React elements instead of using \`dangerouslySetInnerHTML\`
+* Lets you define your own components (to render \`MyHeading\` instead of \`'h1'\`)
+* Has a lot of plugins
+  `;
+
   return (
     <div className="flex h-full w-full flex-col overflow-hidden border">
       <div id="tab-header" className="w-full basis-1/14 bg-red-400"></div>
 
       {/* 消息区 - 可滚动 */}
-      <div className="flex-1 basis-5/6 overflow-y-auto bg-gray-100 p-6">
-        {/* <ChatMessages messages={messages} />
+      <div className="flex flex-1 basis-5/6 items-center justify-center overflow-y-auto">
+        <ScrollArea className="h-full w-full">
+          <div className="h-full max-w-[567px] min-w-[134px] flex-1 space-y-3 overflow-y-auto p-6">
+            {/* <ChatMessages messages={messages} />
         <div ref={messagesEndRef} /> */}
-        <UserMessageItem />
+            <UserMessageItem content="很长很长很长很长很长很长的文字，如果文字超出了最大宽度就会自动换行，没有最大高度限制，能一直往下撑开……" />
+            <AssistantMessage content={aiMessage} />
+            <UserMessageItem content="很长很长很长很长很长很长的文字，如果文字超出了最大宽度就会自动换行，没有最大高度限制，能一直往下撑开……" />
+          </div>
+        </ScrollArea>
       </div>
 
       {/* 输入栏 - 固定底部 */}
-      <div id="chat-bootom" className="flex w-full basis-3/14 flex-col bg-green-400">
+      <div id="chat-bootom" className="flex w-full basis-3/14 flex-col">
         <div className="flex w-full basis-4/5 items-center justify-center">
           <div className="flex w-full max-w-[567px] min-w-[134px]">
             <div className="bg-background flex max-w-full flex-1 flex-col justify-end rounded-3xl border">

@@ -1,7 +1,7 @@
 'use client';
 
-import { ChatContainer } from '@/components/assistant-chat/chatContainer';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
+import { ChatContainer } from '@/components/assistant-chat/ChatContainer';
 
 export default function ResizablePanels() {
   return (
