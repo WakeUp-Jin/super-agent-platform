@@ -1,6 +1,6 @@
-import { Button } from '../ui/button';
-import { ScrollArea } from '../ui/scroll-area';
-import { Separator } from '../ui/separator';
+import { Button } from '../../ui/button';
+import { ScrollArea } from '../../ui/scroll-area';
+import { Separator } from '../../ui/separator';
 import { PersonFeature } from './PersonFeature';
 import PersonRelation from './PersonRelation';
 import { VoiceActor } from './VoiceActor';

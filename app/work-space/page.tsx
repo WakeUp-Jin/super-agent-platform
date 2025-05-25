@@ -2,7 +2,7 @@
 
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { ChatContainer } from '@/components/assistant-chat/ChatContainer';
-import { SfxDescUpdate } from '@/components/canvasText/SfxDescUpdate';
+import { SfxDescUpdate } from '@/components/canvasText/sfxDescUpdateOne/SfxDescUpdate';
 
 export default function ResizablePanels() {
   let aiMessage = `
