@@ -2,6 +2,7 @@
 
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { ChatContainer } from '@/components/assistant-chat/ChatContainer';
+import { SfxDescUpdate } from '@/components/canvasText/SfxDescUpdate';
 
 export default function ResizablePanels() {
   let aiMessage = `
@@ -58,8 +59,8 @@ export default function ResizablePanels() {
       </ResizablePanel>
       <ResizableHandle withHandle />
       <ResizablePanel defaultSize={65}>
-        <div className="flex h-full items-center justify-center">
-          <span className="font-semibold">Content</span>
+        <div className="flex h-full w-full p-5">
+          <SfxDescUpdate></SfxDescUpdate>
         </div>
       </ResizablePanel>
     </ResizablePanelGroup>
