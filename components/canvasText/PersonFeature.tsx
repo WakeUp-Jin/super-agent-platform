@@ -45,8 +45,8 @@ export function PersonFeature() {
             <TableCell className="font-medium">{invoice.name}</TableCell>
             <TableCell>{invoice.age}</TableCell>
             <TableCell>{invoice.gender}</TableCell>
-            <TableCell className="text-center">{invoice.identity}</TableCell>
-            <TableCell className="text-center">{invoice.relationship}</TableCell>
+            <TableCell className="">{invoice.identity}</TableCell>
+            <TableCell className="">{invoice.relationship}</TableCell>
           </TableRow>
         ))}
       </TableBody>

@@ -65,25 +65,30 @@ const edges = personRelation.reduce<any[]>((arr, item) => {
   return arr;
 }, []);
 
-// ② 填 label：把所有关系拼成“朋友 / 老友 / …”
+// ② 填 label：把所有关系拼成"朋友 / 老友 / ..."
 edges.forEach((e) => {
   const rels = Array.from(seen.get(e.id)!);
   e.style = {
-    labelText: rels.join(' / '),
+    labelText: rels[0],
     labelPlacement: 'center',
   };
 });
 
-const PersonGraph = () => {
+const PersonRelation = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const graphRef = useRef<any>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
 
+    const container = containerRef.current;
+
     // 初始化图表
     const graph = new G6Graph({
       container: containerRef.current,
+      width: 500,
+      // autoFit: 'view',
+      // autoResize: true,
       layout: {
         type: 'd3-force',
         /* 1. 排斥力（manyBody）——值越负，推力越大 */
@@ -94,7 +99,7 @@ const PersonGraph = () => {
         nodeSize: 40,
         velocityDecay: 0.2, // 摩擦小，惯性足
         // preventOverlap: true, // 同名布尔开关
-        // /* 4. 迭代衰减 —— 越小越“持久晃荡”，越大越快停 */
+        // /* 4. 迭代衰减 —— 越小越"持久晃荡"，越大越快停 */
         // alphaDecay: 0.03,
         // alphaMin: 0.001,
         // 配置中心力 - 保持图形在画布中心
@@ -130,14 +135,9 @@ const PersonGraph = () => {
 
     // 将图表实例保存到 ref
     graphRef.current = graph;
-
-    // 清理函数
-    return () => {
-      graph.destroy();
-    };
   }, []);
 
-  return <div className="h-[300px] w-full" ref={containerRef} />;
+  return <div className="h-[300px]" ref={containerRef} />;
 };
 
-export default PersonGraph;
+export default PersonRelation;
