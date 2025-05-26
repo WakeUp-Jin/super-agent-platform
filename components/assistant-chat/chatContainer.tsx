@@ -7,20 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import {
-  CopyIcon,
-  RefreshCwIcon,
-  SendHorizontalIcon,
-  UserIcon,
-  BotIcon,
-  PlusIcon,
-  Settings2Icon,
-  MicIcon,
-  Wand2Icon,
-  EllipsisVertical,
-  Columns2,
-  SquarePen,
-} from 'lucide-react';
+import { EllipsisVertical, Columns2, SquarePen } from 'lucide-react';
 import { UserMessageItem } from './UserMessageItem';
 import { AssistantMessage } from './AssistantMessage';
 import { ScrollArea } from '../ui/scroll-area';
