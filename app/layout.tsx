@@ -27,7 +27,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {children}
-        {process.env.NODE_ENV === 'development' && <StagewiseToolbar config={{ plugins: [] }} />}
+        {/* {process.env.NODE_ENV === 'development' && <StagewiseToolbar config={{ plugins: [] }} />} */}
       </body>
     </html>
   );

@@ -8,7 +8,12 @@ import { StoryContent } from './StoryContent';
 import TestWidth from './TestWidth';
 import PersonGraph from './TestWidth';
 import { PersonRelationTable } from './PersonRelationTable';
+import { Eye, EyeClosed, PlusIcon } from 'lucide-react';
+import { useState } from 'react';
+import { TooltipContent, TooltipTrigger, Tooltip, TooltipProvider } from '@/components/ui/tooltip';
 export function SfxDescUpdate() {
+  const [isShowStoryContent, setIsShowStoryContent] = useState(false);
+
   return (
     <div className="w-full">
       <ScrollArea className="h-full w-full">
@@ -52,8 +57,28 @@ export function SfxDescUpdate() {
 
             {/* 剧本 */}
             <div id="story-content">
-              <p className="text-xl font-bold">剧本</p>
-              <StoryContent />
+              <div className="flex w-full items-center justify-between">
+                <p className="text-xl font-bold">剧本</p>
+
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        onClick={() => setIsShowStoryContent(!isShowStoryContent)}
+                        variant="ghost"
+                        size="icon"
+                        className="cursor-pointer"
+                      >
+                        {isShowStoryContent ? <Eye /> : <EyeClosed />}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>展示音效描述</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              <StoryContent isShowStoryContent={isShowStoryContent} />
             </div>
           </div>
         </div>

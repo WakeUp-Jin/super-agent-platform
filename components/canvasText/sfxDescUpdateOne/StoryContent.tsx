@@ -41,12 +41,13 @@ const SfxTag = ({ sfx, onRemove }: SfxTagProps) => (
 // 故事项组件
 interface StoryItemProps {
   item: StoryItem;
+  isShowStoryContent: boolean;
   onRemoveSfx: (sfx: string) => void;
 }
 
-const StoryItemComponent = ({ item, onRemoveSfx }: StoryItemProps) => {
+const StoryItemComponent = ({ item, onRemoveSfx, isShowStoryContent }: StoryItemProps) => {
   const renderContent = () => {
-    if (!item.sfxAddress) {
+    if (!item.sfxAddress || !isShowStoryContent) {
       return <p>{item.text}</p>;
     }
 
@@ -73,19 +74,23 @@ const StoryItemComponent = ({ item, onRemoveSfx }: StoryItemProps) => {
 
   return (
     <div className="flex w-full gap-2 rounded transition-colors duration-200 hover:bg-yellow-50">
-      <div className="flex w-1/6 self-stretch text-right font-sans text-base/6">
+      <div className="flex w-1/8 self-stretch text-right font-sans text-base/6">
         <p className="flex h-full w-full items-start justify-end font-medium text-gray-700">
           {item.role}
         </p>
       </div>
-      <div className="flex w-5/6 self-stretch border-l-2 border-gray-300 pl-3 text-base/6">
+      <div className="flex w-7/8 self-stretch border-l-2 border-gray-300 pl-3 text-base/6">
         {renderContent()}
       </div>
     </div>
   );
 };
 
-export function StoryContent() {
+interface StoryContentProps {
+  isShowStoryContent: boolean;
+}
+
+export function StoryContent({ isShowStoryContent }: StoryContentProps) {
   // 使用 useState 管理故事数据
   const [storyData, setStoryData] = useState<StoryItem[]>([
     {
@@ -138,6 +143,7 @@ export function StoryContent() {
         <StoryItemComponent
           key={item.index}
           item={item}
+          isShowStoryContent={isShowStoryContent}
           onRemoveSfx={(sfx) => handleRemoveSfx(index, sfx)}
         />
       ))}
