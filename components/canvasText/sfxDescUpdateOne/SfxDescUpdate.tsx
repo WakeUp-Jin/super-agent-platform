@@ -57,9 +57,8 @@ export function SfxDescUpdate() {
 
             {/* 剧本 */}
             <div id="story-content">
-              <div className="flex w-full items-center justify-between">
+              <div className="flex w-full items-center justify-between pr-3">
                 <p className="text-xl font-bold">剧本</p>
-
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
