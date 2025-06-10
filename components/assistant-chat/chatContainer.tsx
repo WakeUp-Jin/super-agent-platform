@@ -12,21 +12,29 @@ import { UserMessageItem } from './UserMessageItem';
 import { AssistantMessage } from './AssistantMessage';
 import { ScrollArea } from '../ui/scroll-area';
 import { Toggle } from '@radix-ui/react-toggle';
+import { useChatStream, Message } from '@/lib/useChatStream';
 
-// 你可以这样定义消息类型
-type Message = {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-};
+/**
+ * ChatContainer                // 顶层容器，管理整体聊天流程
+├── useChatStream Hook          // 状态管理和API调用
+├── ChatMessages                // 消息列表渲染
+└── ChatMessageItem             // 单条消息路由
+    ├── UserMessageItem         // 用户消息显示
+    └── AssistantMessage        // AI消息显示
+        ├── AgentStatesDisplay  // Agent状态列表管理
+        │   └── AgentStatusItem // 单个Agent状态显示
+        └── Markdown内容显示
+ * 
+ */
 
 interface ChatProps {
-  messages: Message[];
-  onSend: (content: string) => void;
-  loading?: boolean;
+  // 使用内置的聊天状态管理，不需要外部传入
 }
 
-export function ChatContainer({ messages, onSend, loading }: ChatProps) {
+export function ChatContainer({}: ChatProps) {
+  // 使用聊天流Hook
+  const { messages, loading, error, sendMessage, clearMessages } = useChatStream();
+
   // 输入内容状态
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [input, setInput] = React.useState('');
@@ -39,10 +47,18 @@ export function ChatContainer({ messages, onSend, loading }: ChatProps) {
 
   // 发送消息
   function handleSend() {
-    if (input.trim()) {
-      onSend(input);
+    if (input.trim() && !loading) {
+      sendMessage(input);
       setInput('');
       inputRef.current?.focus();
+    }
+  }
+
+  // 处理回车发送
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
     }
   }
 
@@ -81,12 +97,7 @@ export function ChatContainer({ messages, onSend, loading }: ChatProps) {
           <div className="flex items-center justify-center">
             <div className="h-full max-w-[567px] min-w-[134px] flex-1 space-y-3 overflow-y-auto">
               <ChatMessages messages={messages} />
-              {/* <div ref={messagesEndRef} /> */}
-
-              {/* <UserMessageItem content="很长很长很长很长很长很长的文字，如果文字超出了最大宽度就会自动换行，没有最大高度限制，能一直往下撑开……" />
-              <AssistantMessage content={aiMessage} />
-              <UserMessageItem content="很长很长很长很长很长很长的文字，如果文字超出了最大宽度就会自动换行，没有最大高度限制，能一直往下撑开……" />
-             */}
+              <div ref={messagesEndRef} />
             </div>
           </div>
         </ScrollArea>
@@ -99,23 +110,38 @@ export function ChatContainer({ messages, onSend, loading }: ChatProps) {
             <div className="bg-background flex max-w-full flex-1 flex-col justify-end rounded-3xl border">
               <div className="m-2">
                 <div className="flex flex-row">
-                  <div
-                    contentEditable="true"
-                    className="custom-scrollbar max-h-[150px] min-h-12 w-full rounded-lg border border-none p-4 empty:before:text-gray-400 empty:before:content-[attr(data-placeholder)] focus:outline-none"
-                    id="editor"
-                    data-placeholder="请输入..."
-                  ></div>
+                  <Textarea
+                    ref={inputRef}
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="请输入..."
+                    className="custom-scrollbar max-h-[150px] min-h-12 w-full resize-none rounded-lg border-none p-4 focus:outline-none"
+                    disabled={loading}
+                  />
                 </div>
                 <div className="flex w-full flex-row items-center justify-between">
                   <div>
-                    <Button variant="ghost" className="h-10 w-10 rounded-full p-0">
-                      工具
+                    <Button
+                      variant="ghost"
+                      className="h-10 w-10 rounded-full p-0"
+                      onClick={clearMessages}
+                      disabled={loading}
+                    >
+                      清空
                     </Button>
                   </div>
                   <div>
-                    <Button className="h-10 w-10 rounded-full p-0">发送</Button>
+                    <Button
+                      className="h-10 w-10 rounded-full p-0"
+                      onClick={handleSend}
+                      disabled={loading || !input.trim()}
+                    >
+                      {loading ? '...' : '发送'}
+                    </Button>
                   </div>
                 </div>
+                {error && <div className="mt-2 text-sm text-red-500">错误: {error}</div>}
               </div>
             </div>
           </div>
@@ -140,9 +166,15 @@ function ChatMessages({ messages }: { messages: Message[] }) {
 }
 
 // 单条消息渲染
-function ChatMessageItem({ role, content }: Message) {
+function ChatMessageItem({ role, content, agentStates }: Message) {
   const isUser = role === 'user';
   return (
-    <>{isUser ? <UserMessageItem content={content} /> : <AssistantMessage content={content} />}</>
+    <>
+      {isUser ? (
+        <UserMessageItem content={content} />
+      ) : (
+        <AssistantMessage content={content} agentStates={agentStates} />
+      )}
+    </>
   );
 }

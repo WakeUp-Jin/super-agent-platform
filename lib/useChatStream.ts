@@ -1,0 +1,184 @@
+import { useState, useCallback } from 'react';
+import { sendMessageStreamReadable } from './stream';
+import { SendMessageRequest, StreamEventData, AgentEventData } from './interface/chatInterface';
+
+export interface Message {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: number;
+  agentStates?: Map<string, AgentEventData>; // 存储当前消息相关的所有 agent 状态
+}
+
+export function useChatStream() {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // 添加用户消息
+  const addUserMessage = useCallback((content: string) => {
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content,
+      timestamp: Date.now(),
+    };
+    setMessages((prev) => [...prev, userMessage]);
+    return userMessage.id;
+  }, []);
+
+  // 添加助手消息
+  const addAssistantMessage = useCallback((content: string = '') => {
+    const assistantMessage: Message = {
+      id: Date.now().toString() + '_assistant',
+      role: 'assistant',
+      content,
+      timestamp: Date.now(),
+    };
+    setMessages((prev) => [...prev, assistantMessage]);
+    return assistantMessage.id;
+  }, []);
+
+  // 更新助手消息内容
+  const updateAssistantMessage = useCallback((messageId: string, content: string) => {
+    setMessages((prev) => prev.map((msg) => (msg.id === messageId ? { ...msg, content } : msg)));
+  }, []);
+
+  // 更新助手消息的 Agent 状态
+  const updateAssistantAgentStates = useCallback(
+    (messageId: string, agentStates: Map<string, AgentEventData>) => {
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === messageId ? { ...msg, agentStates: new Map(agentStates) } : msg
+        )
+      );
+    },
+    []
+  );
+
+  // 处理错误的统一函数
+  const handleError = useCallback(
+    (error: Error, messageId: string) => {
+      console.error('流传输错误:', error);
+      setError(error.message);
+      setLoading(false);
+      updateAssistantMessage(messageId, `抱歉，发生了错误: ${error.message}`);
+    },
+    [updateAssistantMessage]
+  );
+
+  // 处理自定义事件
+  const handleCustomEvent = useCallback(
+    (data: StreamEventData, agentStates: Map<string, AgentEventData>, messageId: string) => {
+      const eventData = data.data as AgentEventData;
+
+      if (!eventData?.agentId) return null;
+
+      // 更新 agent 状态
+      agentStates.set(eventData.agentId, eventData);
+      updateAssistantAgentStates(messageId, agentStates);
+
+      // 处理聊天节点的完成状态
+      if (
+        data.name === 'chatNode' &&
+        eventData.status === 'completed' &&
+        eventData.chatAgentContent
+      ) {
+        return eventData.chatAgentContent;
+      }
+
+      return null;
+    },
+    [updateAssistantAgentStates]
+  );
+
+  // 处理流数据的主函数
+  const handleStreamData = useCallback(
+    (data: StreamEventData, agentStates: Map<string, AgentEventData>, messageId: string) => {
+      console.log('收到流数据:', data);
+
+      switch (data.event) {
+        case 'on_custom_event':
+          return handleCustomEvent(data, agentStates, messageId);
+
+        case 'stream_end':
+          console.log('流传输结束:', data.data?.message);
+          return null;
+
+        default:
+          return null;
+      }
+    },
+    [handleCustomEvent]
+  );
+
+  // 发送消息
+  const sendMessage = useCallback(
+    async (content: string, inputParam?: any) => {
+      if (loading) return;
+
+      setLoading(true);
+      setError(null);
+
+      // 添加用户消息
+      addUserMessage(content);
+
+      // 创建空的助手消息用于流式更新
+      const assistantMessageId = addAssistantMessage();
+      const agentStates = new Map<string, AgentEventData>();
+
+      const request: SendMessageRequest = {
+        userInput: content,
+        inputParam,
+      };
+
+      try {
+        await sendMessageStreamReadable(
+          request,
+          // 流数据处理器
+          (data: StreamEventData) => {
+            const assistantContent = handleStreamData(data, agentStates, assistantMessageId);
+            if (assistantContent) {
+              updateAssistantMessage(assistantMessageId, assistantContent);
+            }
+          },
+          // 完成回调
+          () => {
+            console.log('流传输完成');
+            setLoading(false);
+          },
+          // 错误回调
+          (error: Error) => handleError(error, assistantMessageId)
+        );
+      } catch (error) {
+        console.error('发送消息失败:', error);
+        const errorMessage = error instanceof Error ? error.message : '未知错误';
+        setError(errorMessage);
+        setLoading(false);
+        updateAssistantMessage(assistantMessageId, '抱歉，发送消息失败，请重试。');
+      }
+    },
+    [
+      loading,
+      addUserMessage,
+      addAssistantMessage,
+      updateAssistantMessage,
+      handleStreamData,
+      handleError,
+    ]
+  );
+
+  // 清空对话
+  const clearMessages = useCallback(() => {
+    setMessages([]);
+    setError(null);
+  }, []);
+
+  return {
+    messages,
+    loading,
+    error,
+    sendMessage,
+    clearMessages,
+  };
+}

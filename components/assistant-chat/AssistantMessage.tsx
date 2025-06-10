@@ -1,17 +1,33 @@
+import React from 'react';
+import { Message } from '@/lib/useChatStream';
+import { MessageCircle, User, ChevronDown, ChevronRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Pencil, RefreshCwIcon, ThumbsDown, ThumbsUp } from 'lucide-react';
 import { Copy } from 'lucide-react';
 import { Toggle } from '../ui/toggle';
 import Markdown from 'react-markdown';
+import { AgentStatesDisplay } from './AgentStatesDisplay';
+import { AgentEventData } from '@/lib/interface/chatInterface';
 
-export function AssistantMessage({ content }: { content: string }) {
+interface AssistantMessageProps {
+  content: string;
+  agentStates?: Map<string, AgentEventData>;
+}
+
+export function AssistantMessage({ content, agentStates }: AssistantMessageProps) {
   return (
     <div className="flex w-full justify-start">
       <div className="flex flex-col">
-        <div className="prose rounded-lg p-4 break-words shadow">
-          {/* 这里是一段很长很长很长很长很长很长的文字，如果文字超出了最大宽度就会自动换行，没有最大高度限制，能一直往下撑开…… */}
-          <Markdown>{content}</Markdown>
-        </div>
+        {/* 显示 Agent 状态 */}
+        {agentStates && <AgentStatesDisplay agentStates={agentStates} />}
+
+        {/* 显示聊天内容 */}
+        {content && (
+          <div className="prose rounded-lg p-4 break-words shadow">
+            <Markdown>{content}</Markdown>
+          </div>
+        )}
         <div className="max-w-sm">
           <Toggle
             aria-label="Toggle italic"

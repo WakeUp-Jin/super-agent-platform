@@ -55,7 +55,8 @@ export default function ResizablePanels() {
         <div className="flex h-full items-center justify-center">
           {/* <span className="font-semibold">Sidebar</span>
            */}
-          <ChatContainer messages={messages} onSend={() => {}} />
+          {/* <ChatContainer messages={messages} onSend={() => {}} /> */}
+          <ChatContainer></ChatContainer>
         </div>
       </ResizablePanel>
       <ResizableHandle withHandle />
