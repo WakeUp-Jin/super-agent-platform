@@ -96,7 +96,7 @@ export function ChatContainer({}: ChatProps) {
         <ScrollArea className="h-full w-full">
           <div className="flex items-center justify-center">
             <div className="h-full max-w-[567px] min-w-[134px] flex-1 space-y-3 overflow-y-auto">
-              <ChatMessages messages={messages} />
+              <ChatMessages messages={messages} loading={loading} />
               <div ref={messagesEndRef} />
             </div>
           </div>
@@ -116,7 +116,7 @@ export function ChatContainer({}: ChatProps) {
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder="请输入..."
-                    className="custom-scrollbar max-h-[150px] min-h-12 w-full resize-none rounded-lg border-none p-4 focus:outline-none"
+                    className="custom-scrollbar max-h-[150px] min-h-12 w-full resize-none rounded-lg border-none p-4 focus:ring-0 focus:outline-none focus-visible:ring-0"
                     disabled={loading}
                   />
                 </div>
@@ -132,16 +132,11 @@ export function ChatContainer({}: ChatProps) {
                     </Button>
                   </div>
                   <div>
-                    <Button
-                      className="h-10 w-10 rounded-full p-0"
-                      onClick={handleSend}
-                      disabled={loading || !input.trim()}
-                    >
+                    <Button className="h-10 w-10 rounded-full p-0" onClick={handleSend}>
                       {loading ? '...' : '发送'}
                     </Button>
                   </div>
                 </div>
-                {error && <div className="mt-2 text-sm text-red-500">错误: {error}</div>}
               </div>
             </div>
           </div>
@@ -155,25 +150,25 @@ export function ChatContainer({}: ChatProps) {
 }
 
 // 单条消息
-function ChatMessages({ messages }: { messages: Message[] }) {
+function ChatMessages({ messages, loading }: { messages: Message[]; loading: boolean }) {
   return (
     <div>
       {messages.map((msg) => (
-        <ChatMessageItem key={msg.id} {...msg} />
+        <ChatMessageItem key={msg.id} {...msg} loading={loading} />
       ))}
     </div>
   );
 }
 
 // 单条消息渲染
-function ChatMessageItem({ role, content, agentStates }: Message) {
+function ChatMessageItem({ role, content, agentStates, loading }: Message & { loading: boolean }) {
   const isUser = role === 'user';
   return (
     <>
       {isUser ? (
         <UserMessageItem content={content} />
       ) : (
-        <AssistantMessage content={content} agentStates={agentStates} />
+        <AssistantMessage loading={loading} content={content} agentStates={agentStates} />
       )}
     </>
   );

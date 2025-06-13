@@ -1,5 +1,3 @@
-// API客户端配置
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
 
 export interface SendMessageRequest {
   userInput: string;
