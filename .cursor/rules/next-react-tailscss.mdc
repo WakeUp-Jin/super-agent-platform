@@ -1,0 +1,97 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+## 分析流程（Analysis Process）
+在响应任何请求前，请遵循以下步骤：
+
+1. **请求分析（Request Analysis）**
+    - 确定任务类型（代码编写、调试、架构设计等）
+    - 明确涉及的语言和框架
+    - 注意显式与隐式需求
+    - 定义核心问题与期望结果
+    - 考虑项目上下文与约束条件
+2. **解决方案规划（Solution Planning）**
+    - 将解决方案拆解为逻辑步骤
+    - 考虑模块化和可复用性
+    - 明确所需文件和依赖
+    - 评估备选方案
+    - 规划测试与验证方式
+3. **实现策略（Implementation Strategy）**
+    - 选择合适的设计模式
+    - 考虑性能影响
+    - 规划错误处理与边界情况
+    - 确保无障碍访问合规（Accessibility Compliance）
+    - 验证是否符合最佳实践
+
+## 代码风格与结构（Code Style and Structure）
+### 通用原则（General Principles）
++ 编写简洁、可读的 TypeScript 代码
++ 优先使用函数式和声明式编程模式
++ 遵循 **DRY 原则**（Don’t Repeat Yourself）
++ 使用**早返回**提高可读性
++ 逻辑上组织组件结构：导出组件、子组件、辅助函数、静态内容、类型定义
+
+---
+
+### 命名规范（Naming Conventions）
++ 使用有描述性的名称，搭配助动词（如 `isLoading`、`hasError`）
++ 事件处理函数使用 `handle` 前缀（如 `handleClick`、`handleSubmit`）
++ 目录名使用小写短横线（如 `components/auth-wizard`）
++ 组件使用**具名导出**（Named Exports）优先于默认导出
+
+---
+
+### TypeScript 使用规范（TypeScript Usage）
++ 所有代码使用 TypeScript
++ 优先使用 `interface` 而非 `type`
++ 避免使用 `enum`，改用 `const map`
++ 函数组件应使用 TypeScript 接口定义 Props 类型
+
+### 语法与格式（Syntax and Formatting）
++ 纯函数应使用 `function` 关键字声明
++ 简单语句中的条件逻辑应尽量避免不必要的大括号，使用简洁语法
++ JSX 编写风格应声明式、清晰
+
+
+
+### UI 与样式（UI and Styling）
++ 组件与样式使用 Shadcn UI、Radix UI 和 Tailwind CSS
++ 使用 Tailwind 实现响应式设计
++ `clsx`：处理 Tailwind class 合并逻辑
+
+---
+
+## React 19 与 Next.js 15 的最佳实践
+遵循 Next.js 官方文档关于数据获取（Data Fetching）、渲染方式（Rendering）和路由机制（Routing）的建议
+
+### 组件架构（Component Architecture）
++ 优先使用 **React Server Components (RSC)**
++ 最小化 `use client` 指令的使用
++ 实现合适的错误边界（Error Boundaries）
++ 使用 `Suspense` 处理异步操作
++ 优化性能和 **Web Vitals 指标**
+
+---
+
+### 状态管理（State Management）
++ 使用 `useActionState` 替代过时的 `useFormState`
++ 使用增强版 `useFormStatus`，支持更多属性（如 `data`, `method`, `action`）
++ 使用 `nuqs` 实现 URL 状态管理
++ 减少客户端状态的使用
+
+---
+
+### 异步请求 API（Async Request APIs）
+```plain
+// 始终使用异步版本的运行时 API
+const cookieStore = await cookies()
+const headersList = await headers()
+const { isEnabled } = await draftMode()
+
+// 在 layout/page 中处理异步参数
+const params = await props.params
+const searchParams = await props.searchParams
+```
+
