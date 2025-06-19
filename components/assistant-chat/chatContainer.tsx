@@ -48,7 +48,11 @@ export function ChatContainer({}: ChatProps) {
   // 发送消息
   function handleSend() {
     if (input.trim() && !loading) {
-      sendMessage(input);
+      sendMessage(input, {
+        userId: '123',
+        sessionId: '456',
+        messageId: '789',
+      });
       setInput('');
       inputRef.current?.focus();
     }
