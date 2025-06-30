@@ -1,4 +1,4 @@
-import { create, SetState } from 'zustand';
+import { create } from 'zustand';
 
 interface UiState {
   isShowSfxAddress: boolean;
@@ -6,9 +6,8 @@ interface UiState {
   setShowSfxAddress: (value: boolean) => void;
 }
 
-export const useUiStore = create<UiState>((set: SetState<UiState>) => ({
+export const useUiStore = create<UiState>((set) => ({
   isShowSfxAddress: false,
-  toggleSfxAddress: () =>
-    set((state: UiState): Partial<UiState> => ({ isShowSfxAddress: !state.isShowSfxAddress })),
+  toggleSfxAddress: () => set((state) => ({ isShowSfxAddress: !state.isShowSfxAddress })),
   setShowSfxAddress: (value: boolean) => set({ isShowSfxAddress: value }),
 }));
