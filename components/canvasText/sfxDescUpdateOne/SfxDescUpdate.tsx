@@ -9,10 +9,11 @@ import TestWidth from './TestWidth';
 import PersonGraph from './TestWidth';
 import { PersonRelationTable } from './PersonRelationTable';
 import { Eye, EyeClosed, PlusIcon } from 'lucide-react';
-import { useState } from 'react';
+import { useUiStore } from '@/lib/store/useUiStore';
 import { TooltipContent, TooltipTrigger, Tooltip, TooltipProvider } from '@/components/ui/tooltip';
+
 export function SfxDescUpdate() {
-  const [isShowStoryContent, setIsShowStoryContent] = useState(false);
+  const { isShowSfxAddress, toggleSfxAddress } = useUiStore();
 
   return (
     <div className="w-full">
@@ -56,19 +57,19 @@ export function SfxDescUpdate() {
             <Separator className="my-2" />
 
             {/* 剧本 */}
-            <div id="story-content">
+            <div id="story-content" className="px-2">
               <div className="flex w-full items-center justify-between pr-3">
                 <p className="text-xl font-bold">第一步</p>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
-                        onClick={() => setIsShowStoryContent(!isShowStoryContent)}
+                        onClick={toggleSfxAddress}
                         variant="ghost"
                         size="icon"
                         className="cursor-pointer"
                       >
-                        {isShowStoryContent ? <Eye /> : <EyeClosed />}
+                        {isShowSfxAddress ? <Eye /> : <EyeClosed />}
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
@@ -77,7 +78,7 @@ export function SfxDescUpdate() {
                   </Tooltip>
                 </TooltipProvider>
               </div>
-              <StoryContent isShowStoryContent={isShowStoryContent} />
+              <StoryContent />
             </div>
           </div>
         </div>

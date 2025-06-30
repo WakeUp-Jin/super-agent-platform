@@ -1,267 +1,213 @@
 'use client';
-import React, { useState, useRef, useEffect } from 'react';
-import { Pencil, Plus, X, Minus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { CustomeTabPopover } from './CustomeTabPopover';
+import React, { useState } from 'react';
+import { StoryItem, SfxMeta } from './types';
+import { StoryItemComponent } from './storyContent/StoryItemComponent';
 
-// 类型定义
-interface StoryItem {
-  index: number;
-  role: string;
-  sourceIndex: number;
-  scene: string;
-  text: string;
-  emotionBGM: string;
-  reasonEmotion: string;
-  emotionBGMId: number;
-  sfxList?: string[];
-  sfxAddress?: string;
-  emotionRole?: string;
-  rationale?: string;
-}
-
-interface SfxTagProps {
-  sfx: string;
-  onRemove: () => void;
-}
-
-// 音效标签组件
-const SfxTag = ({ sfx, onRemove }: SfxTagProps) => (
-  <span className="mx-1 inline-flex items-center gap-1 rounded-md bg-cyan-200 px-2">
-    {sfx}
-    <button
-      type="button"
-      className="cursor-pointer rounded-full transition-colors hover:bg-cyan-300"
-      onClick={onRemove}
-      aria-label={`删除音效: ${sfx}`}
-    >
-      <X className="h-4 w-4" />
-    </button>
-  </span>
-);
-
-// 故事项组件
-interface StoryItemProps {
-  item: StoryItem;
-  isShowStoryContent: boolean;
-  onRemoveSfx: (sfx: string) => void;
-}
-
-const StoryItemComponent = ({ item, onRemoveSfx, isShowStoryContent }: StoryItemProps) => {
-  const renderContent = () => {
-    if (!item.sfxAddress || !isShowStoryContent) {
-      return <p>{item.text}</p>;
-    }
-
-    // 解析音效地址，提取文本和音效
-    const parts = item.sfxAddress.split(/\(音效:([^)]+)\)/);
-    const elements: React.ReactElement[] = [];
-
-    for (let i = 0; i < parts.length; i++) {
-      const part = parts[i];
-      if (!part) continue;
-
-      // 检查是否是音效
-      const isSfx = item.sfxList?.includes(part);
-
-      if (isSfx) {
-        elements.push(<SfxTag key={`sfx-${i}`} sfx={part} onRemove={() => onRemoveSfx(part)} />);
-      } else {
-        elements.push(<span key={`text-${i}`}>{part}</span>);
-      }
-    }
-
-    return <p>{elements}</p>;
-  };
-
-  return (
-    <div className="flex w-full gap-2 rounded transition-colors duration-200 hover:bg-yellow-50">
-      <div className="flex w-1/8 self-stretch text-right font-sans text-base/6">
-        <p className="flex h-full w-full items-start justify-end font-medium text-gray-700">
-          {item.role}
-        </p>
-      </div>
-      <div className="flex w-7/8 self-stretch border-l-2 border-gray-300 pl-3 text-base/6">
-        {renderContent()}
-      </div>
-    </div>
-  );
-};
-
-interface StoryContentProps {
-  isShowStoryContent: boolean;
-}
-
-export function StoryContent({ isShowStoryContent }: StoryContentProps) {
-  // 使用 useState 管理故事数据
+export function StoryContent() {
+  // 使用新的数据结构
   const [storyData, setStoryData] = useState<StoryItem[]>([
     {
-      index: 5,
+      id: 1,
       role: '旁白',
-      // role: '111',
-      sourceIndex: 4,
-      scene: '酒馆会面恩格斯',
-      text: '角落里的桌子上坐着一个人，蓄着金色胡须的脸庞显得神采奕奕。他正是马克思的老友兼同事，弗里德里希·恩格斯。一看到马克思走进来，恩格斯立刻站起身来，挥手示意他过来。',
-      // text: '哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈',
-      emotionBGM: '希望与振奋',
-      reasonEmotion: '马克思与恩格斯在酒馆重逢，友谊与革命信念的碰撞，情绪从疲惫转向激昂',
-      emotionBGMId: 2,
-      sfxList: ['大风', '大雪'],
-      sfxAddress: '角落里的桌子上坐着一个人(音效:大风)，蓄着金色胡须的脸庞显得神采奕奕(音效:大雪)。他正是马克思的老友兼同事，弗里德里希·恩格斯。一看到马克思走进来，恩格斯立刻站起身来，挥手示意他过来。',
-      // sfxAddress: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+      type: 'text',
+      status: 'normal',
+      originValue:
+        '角落里的桌子上坐着一个人，蓄着金色胡须的脸庞显得神采奕奕。他正是马克思的老友兼同事，弗里德里希·恩格斯。一看到马克思走进来，恩格斯立刻站起身来，挥手示意他过来。',
+      updateValue: '',
+      peopleSelectValue: '',
+      sfxMetaId: 'sfx-desc-1', // 关联音效描述ID
     },
     {
-      index: 6,
+      id: 2,
+      role: '音效描述',
+      type: 'sfx',
+      status: 'reviewed',
+      originValue: ['大风'],
+      updateValue: ['大风', '大雪'],
+      peopleSelectValue: 'updateValue',
+      sfxMetaId: 'sfx-desc-1', // 关联音效描述ID
+    },
+    {
+      id: 3,
       role: '恩格斯',
-      // role: '222',
-      sourceIndex: 5,
-      scene: '酒馆会面恩格斯',
-      text: '"卡尔，过来这边！"',
-      // text: '哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈',
-      emotionRole: '中性',
-      rationale: '正常招呼语，未体现明显情感倾向',
-      emotionBGM: '希望与振奋',
-      reasonEmotion: '马克思与恩格斯在酒馆重逢，友谊与革命信念的碰撞，情绪从疲惫转向激昂',
-      emotionBGMId: 2,
+      type: 'text',
+      status: 'pending',
+      originValue: '"卡尔，过来这边！"',
+      updateValue: '"卡尔，我的老朋友，快过来这边坐！"',
+      peopleSelectValue: 'originValue',
+    },
+    {
+      id: 4,
+      role: '恩格斯',
+      type: 'text',
+      status: 'normal',
+      originValue: '"卡尔，过来这边！"',
+      updateValue: '"卡尔，我的老朋友，快过来这边坐！"',
+      peopleSelectValue: 'originValue',
+    },
+    {
+      id: 5,
+      role: '音效描述',
+      type: 'sfx',
+      status: 'pending',
+      originValue: ['大风'],
+      updateValue: ['大风', '大雪'],
+      peopleSelectValue: 'updateValue',
+      sfxMetaId: 'sfx-desc-1', // 关联音效描述ID
     },
   ]);
 
-  // 管理标签数据
-  const [badges, setBadges] = useState<string[]>([
-    '标签1',
-    '标签2',
-    '标签3',
-    '标签4',
-    '标签5',
-    '标签6',
+  // 独立管理音效描述数据
+  const [sfxMeta, setSfxMeta] = useState<SfxMeta[]>([
+    {
+      id: 'sfx-desc-1',
+      sfxAddress:
+        '角落里的桌子上坐着一个人(音效:大风)，蓄着金色胡须的脸庞显得神采奕奕(音效:大雪)。他正是马克思的老友兼同事，弗里德里希·恩格斯。一看到马克思走进来，恩格斯立刻站起身来，挥手示意他过来。',
+      sfxList: ['大风', '大雪'],
+    },
   ]);
 
-  // 管理弹出层状态
-  const [openPopover, setOpenPopover] = useState<number | null>(null);
-
-  // 管理输入框状态
-  const [isInputVisible, setIsInputVisible] = useState(false);
-  const [inputValue, setInputValue] = useState('');
-
-  // 输入框引用
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  // 当输入框显示时自动聚焦
-  useEffect(() => {
-    if (isInputVisible && inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [isInputVisible]);
-
-  // 处理音效删除
-  const handleRemoveSfx = (itemIndex: number, sfx: string) => {
-    console.log('🚀 ~ handleRemoveSfx ~ itemIndex:', itemIndex);
-    console.log('🚀 ~ handleRemoveSfx ~ sfx:', sfx);
+  // 处理审核同意
+  const handleApprove = (id: number) => {
     setStoryData((prev) =>
-      prev.map((item, index) =>
-        index === itemIndex
+      prev.map((item) =>
+        item.id === id
           ? {
               ...item,
-              sfxList: item.sfxList?.filter((el) => el !== sfx),
-              sfxAddress: item.sfxAddress?.replace(`(音效:${sfx})`, ''),
+              status: 'reviewed' as const,
+              peopleSelectValue: 'updateValue' as const,
             }
           : item
       )
     );
   };
 
-  // 处理标签删除确认
-  const handleConfirmDelete = (badgeIndex: number, reason: string) => {
-    console.log(`删除标签 "${badges[badgeIndex]}"，理由：${reason || '无'}`);
-    setBadges((prev) => prev.filter((_, index) => index !== badgeIndex));
-    setOpenPopover(null);
+  // 处理审核拒绝
+  const handleReject = (id: number) => {
+    setStoryData((prev) =>
+      prev.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              status: 'reviewed' as const,
+              peopleSelectValue: 'originValue' as const,
+            }
+          : item
+      )
+    );
   };
 
-  // 处理添加按钮点击
-  const handleAddClick = () => {
-    if (isInputVisible) {
-      // 如果输入框可见，隐藏它并清空输入
-      setIsInputVisible(false);
-      setInputValue('');
-    } else {
-      // 如果输入框不可见，显示它
-      setIsInputVisible(true);
-    }
-  };
-
-  // 处理输入框回车
-  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      const trimmedValue = inputValue.trim();
-      if (trimmedValue) {
-        // 添加新标签到badges数组
-        setBadges((prev) => [...prev, trimmedValue]);
-        // 清空输入并隐藏输入框
-        setInputValue('');
-        setIsInputVisible(false);
+  // 处理音效删除
+  const handleRemoveSfx = (itemId: number, sfx: string) => {
+    let item = storyData.find((item) => item.id === itemId);
+    if (item) {
+      let sfxMetaId = item.sfxMetaId;
+      let sfxResult = sfxMeta.find((desc) => desc.id === sfxMetaId);
+      if (sfxResult) {
+        sfxResult.sfxAddress = sfxResult.sfxAddress?.replace(`(音效:${sfx})`, '');
+        sfxResult.sfxList = sfxResult.sfxList?.filter((el) => el !== sfx);
+      }
+      if (Array.isArray(item.updateValue)) {
+        item.updateValue = item.updateValue.filter((el) => el !== sfx);
+      }
+      if (Array.isArray(item.originValue)) {
+        item.originValue = item.originValue.filter((el) => el !== sfx);
       }
     }
   };
 
+  // 处理音效描述更新（同时更新 sfxList 和对应的 originValue/updateValue）
+  const handleUpdateSfxDescription = (sfxMetaId: string, newDescriptions: string[]) => {
+    // 更新 SfxMeta 中的 sfxList
+    setSfxMeta((prev) =>
+      prev.map((item) =>
+        item.id === sfxMetaId
+          ? {
+              ...item,
+              sfxList: newDescriptions,
+              // 重新生成 sfxAddress，按顺序替换音效标签
+              sfxAddress: (() => {
+                let sfxIndex = 0;
+                return item.sfxAddress.replace(/\(音效:[^)]+\)/g, () =>
+                  newDescriptions[sfxIndex] ? `(音效:${newDescriptions[sfxIndex++]})` : ''
+                );
+              })(),
+            }
+          : item
+      )
+    );
+
+    // 同时更新关联的 StoryItem 中的 originValue/updateValue
+    setStoryData((prev) =>
+      prev.map((item) =>
+        item.sfxMetaId === sfxMetaId
+          ? {
+              ...item,
+              // 根据当前选择的值更新对应字段
+              ...(item.peopleSelectValue === 'originValue' || item.peopleSelectValue === ''
+                ? { originValue: newDescriptions }
+                : { updateValue: newDescriptions }),
+            }
+          : item
+      )
+    );
+  };
+
+  // 处理音效描述删除
+  const handleDeleteSfxDescription = (descId: string) => {
+    setSfxMeta((prev) => prev.filter((desc) => desc.id !== descId));
+    // 同时更新故事数据中的关联
+    setStoryData((prev) =>
+      prev.map((item) => ({
+        ...item,
+        sfxMetaId: item.sfxMetaId === descId ? undefined : item.sfxMetaId,
+      }))
+    );
+  };
+
+  // 处理添加音效描述
+  const handleAddSfxDescription = (description: string) => {
+    const newId = `sfx-desc-${Date.now()}`;
+    const newSfxMeta: SfxMeta = {
+      id: newId,
+      sfxAddress: `新内容(音效:${description})`,
+      sfxList: [description],
+    };
+
+    setSfxMeta((prev) => [...prev, newSfxMeta]);
+
+    // 如果有音效描述类型的故事项，自动关联新的音效描述
+    setStoryData((prev) =>
+      prev.map((item) =>
+        item.type === 'sfx' && !item.sfxMetaId
+          ? {
+              ...item,
+              sfxMetaId: newId,
+            }
+          : item
+      )
+    );
+  };
+
+  // 获取故事项关联的音效描述
+  const getSfxMetaForItem = (item: StoryItem): SfxMeta | undefined => {
+    if (!item.sfxMetaId) return undefined;
+    return sfxMeta.find((desc) => item.sfxMetaId === desc.id);
+  };
+
   return (
     <div className="mt-3 flex w-full flex-col gap-5">
-      {storyData.map((item, index) => (
+      {storyData.map((item) => (
         <StoryItemComponent
-          key={item.index}
+          key={item.id}
           item={item}
-          isShowStoryContent={isShowStoryContent}
-          onRemoveSfx={(sfx) => handleRemoveSfx(index, sfx)}
+          onApprove={handleApprove}
+          onReject={handleReject}
+          onRemoveSfx={handleRemoveSfx}
+          sfxMeta={getSfxMetaForItem(item)}
+          onUpdateSfxDescription={handleUpdateSfxDescription}
         />
       ))}
-      <div className="flex h-8 w-full gap-2">
-        <div className="h-full w-1/8">
-          <p className="flex h-full w-full items-start justify-end font-medium text-gray-700">
-            【qq】
-          </p>
-        </div>
-        <div className="flex h-full w-7/8 border-l-2 border-gray-300 pl-3">
-          <div className="flex w-full flex-wrap items-center gap-3">
-            {badges.map((badge, index) => (
-              <Badge key={index} className="group relative h-7 bg-[#3c6e71] text-sm">
-                {badge}
-                <CustomeTabPopover
-                  open={openPopover === index}
-                  onOpenChange={(open) => setOpenPopover(open ? index : null)}
-                  onConfirm={(reason) => handleConfirmDelete(index, reason)}
-                >
-                  <button
-                    type="button"
-                    className="ml-1 cursor-pointer opacity-100 transition-opacity group-hover:opacity-100"
-                    aria-label={`删除标签: ${badge}`}
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </CustomeTabPopover>
-              </Badge>
-            ))}
-            <input
-              type="text"
-              className="h-7 w-20 rounded-md border-2 border-gray-300"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={handleInputKeyDown}
-              style={{ display: isInputVisible ? 'block' : 'none' }}
-              ref={inputRef}
-            />
-          </div>
-          <div className="w-20 flex-none">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 cursor-pointer"
-              onClick={handleAddClick}
-            >
-              {isInputVisible ? <Minus className="" /> : <Plus className="" />}
-            </Button>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
