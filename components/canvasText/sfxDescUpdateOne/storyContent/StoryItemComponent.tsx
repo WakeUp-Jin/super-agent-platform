@@ -30,8 +30,11 @@ export const StoryItemComponent = ({
     }
 
     // normal 或 reviewed 状态，根据 type 决定渲染什么内容组件
-    const finalContent =
-      item.peopleSelectValue === 'originValue' ? item.originValue : item.updateValue;
+    let finalContent = item.originValue;
+
+    if (item.status === 'reviewed') {
+      finalContent = item.peopleSelectValue === 'originValue' ? item.originValue : item.updateValue;
+    }
 
     if (item.type === 'text') {
       return (
