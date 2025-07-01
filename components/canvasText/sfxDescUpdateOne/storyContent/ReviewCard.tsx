@@ -1,7 +1,7 @@
 import React from 'react';
 import { Check, Minus, Plus, XIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ReviewCardProps } from '../types';
+import { ReviewCardProps } from './types';
 import { TextItem } from './TextItem';
 import { SfxDescItem } from './SfxDescItem';
 import { Badge } from '@/components/ui/badge';

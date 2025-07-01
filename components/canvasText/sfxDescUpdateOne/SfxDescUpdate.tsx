@@ -4,7 +4,7 @@ import { Separator } from '../../ui/separator';
 import { PersonFeature } from './PersonFeature';
 import PersonRelation from './PersonRelation';
 import { VoiceActor } from './VoiceActor';
-import { StoryContent } from './StoryContent';
+import { StoryContent } from './storyContent/StoryContent';
 import TestWidth from './TestWidth';
 import PersonGraph from './TestWidth';
 import { PersonRelationTable } from './PersonRelationTable';

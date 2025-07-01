@@ -1,6 +1,6 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { StoryItemComponentProps } from '../types';
+import { StoryItemComponentProps } from './types';
 import { TextItem } from './TextItem';
 import { SfxDescItem } from './SfxDescItem';
 import { ReviewCard } from './ReviewCard';

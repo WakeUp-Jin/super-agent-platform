@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { SfxDescItemProps } from '../types';
+import { SfxDescItemProps } from './types';
 import { CustomeTabPopover } from '../CustomeTabPopover';
 import { X, Plus, Minus, SquarePen, PenOff } from 'lucide-react';
 
@@ -85,9 +85,10 @@ export const SfxDescItem = ({
       <div className="flex h-full w-7/8 border-l-2 border-gray-300 pl-3">
         <div className="flex w-full flex-wrap items-center gap-3">
           {displayContent.map((item, globalIndex) => (
+            // bg-[#3c6e71]
             <Badge
               key={`${item}-${globalIndex}`}
-              className={`group relative h-7 bg-[#3c6e71] text-sm ${highlight ? 'bg-yellow-200' : ''}`}
+              className={`group relative h-7 bg-[#3c6e71] text-sm`}
             >
               {item}
               <CustomeTabPopover
@@ -99,6 +100,7 @@ export const SfxDescItem = ({
                   type="button"
                   className="ml-1 cursor-pointer opacity-100 transition-opacity group-hover:opacity-100"
                   aria-label={`删除音效描述: ${item}`}
+                  style={{ display: canEdit ? 'block' : 'none' }}
                 >
                   <X className="h-3 w-3" />
                 </button>

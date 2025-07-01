@@ -1,6 +1,6 @@
 import React from 'react';
 import { X } from 'lucide-react';
-import { SfxTagProps } from './types';
+import { SfxTagProps } from './storyContent/types';
 
 // 音效标签组件
 export const SfxTag = ({ sfx, onRemove }: SfxTagProps) => (

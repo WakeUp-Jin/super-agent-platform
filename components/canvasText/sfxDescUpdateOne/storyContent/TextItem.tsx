@@ -1,7 +1,7 @@
 import React from 'react';
 import { Volume2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { TextItemProps } from '../types';
+import { TextItemProps } from './types';
 import { SfxTag } from '../SfxTag';
 import { useUiStore } from '@/lib/store/useUiStore';
 

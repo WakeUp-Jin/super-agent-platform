@@ -1,74 +1,39 @@
 'use client';
-import React, { useState } from 'react';
-import { StoryItem, SfxMeta } from './types';
-import { StoryItemComponent } from './storyContent/StoryItemComponent';
+import React, { useEffect, useState } from 'react';
+import { StoryItem, SfxMeta } from '@/lib/interface/viewInterface';
+import { StoryItemComponent } from './StoryItemComponent';
+import { useViewBoardStore } from '@/lib/store/useViewBoardStore';
+import { getView } from '@/lib/api/view';
 
 export function StoryContent() {
-  // 使用新的数据结构
-  const [storyData, setStoryData] = useState<StoryItem[]>([
-    {
-      id: 1,
-      role: '旁白',
-      type: 'text',
-      status: 'normal',
-      originValue:
-        '角落里的桌子上坐着一个人，蓄着金色胡须的脸庞显得神采奕奕。他正是马克思的老友兼同事，弗里德里希·恩格斯。一看到马克思走进来，恩格斯立刻站起身来，挥手示意他过来。',
-      updateValue: '',
-      peopleSelectValue: '',
-      sfxMetaId: 'sfx-desc-1', // 关联音效描述ID
-    },
-    {
-      id: 2,
-      role: '音效描述',
-      type: 'sfx',
-      status: 'reviewed',
-      originValue: ['大风'],
-      updateValue: ['大风', '大雪'],
-      peopleSelectValue: 'updateValue',
-      sfxMetaId: 'sfx-desc-1', // 关联音效描述ID
-    },
-    {
-      id: 3,
-      role: '恩格斯',
-      type: 'text',
-      status: 'pending',
-      originValue: '"卡尔，过来这边！"',
-      updateValue: '"卡尔，我的老朋友，快过来这边坐！"',
-      peopleSelectValue: 'originValue',
-    },
-    {
-      id: 4,
-      role: '恩格斯',
-      type: 'text',
-      status: 'normal',
-      originValue: '"卡尔，过来这边！"',
-      updateValue: '"卡尔，我的老朋友，快过来这边坐！"',
-      peopleSelectValue: 'originValue',
-    },
-    {
-      id: 5,
-      role: '音效描述',
-      type: 'sfx',
-      status: 'pending',
-      originValue: ['大风'],
-      updateValue: ['大风', '大雪'],
-      peopleSelectValue: 'updateValue',
-      sfxMetaId: 'sfx-desc-1', // 关联音效描述ID
-    },
-  ]);
+  const { board, setBoard } = useViewBoardStore();
 
-  // 独立管理音效描述数据
-  const [sfxMeta, setSfxMeta] = useState<SfxMeta[]>([
-    {
-      id: 'sfx-desc-1',
-      sfxAddress:
-        '角落里的桌子上坐着一个人(音效:大风)，蓄着金色胡须的脸庞显得神采奕奕(音效:大雪)。他正是马克思的老友兼同事，弗里德里希·恩格斯。一看到马克思走进来，恩格斯立刻站起身来，挥手示意他过来。',
-      sfxList: ['大风', '大雪'],
-    },
-  ]);
+  // 首次挂载时拉取数据
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await getView({
+        sessionId: '456-debug3-800',
+        userId: '123',
+        viewStep: '1',
+      });
+      console.log(data);
+      setBoard(data);
+    };
+    fetchData();
+  }, [setBoard]);
 
+  // 从全局 store 拿到 storyData / sfxMeta
+  const [storyData, setStoryData] = useState<StoryItem[]>([]);
+  const [sfxMeta, setSfxMeta] = useState<SfxMeta[]>([]);
+
+  useEffect(() => {
+    setStoryData(board?.audioScript?.storyItems ?? []);
+    setSfxMeta(board?.audioScript?.sfxMetas ?? []);
+  }, [board]);
+
+  // 当全局 board 更新时同步本地可编辑 state
   // 处理审核同意
-  const handleApprove = (id: number) => {
+  const handleApprove = (id: string) => {
     setStoryData((prev) =>
       prev.map((item) =>
         item.id === id
@@ -83,7 +48,7 @@ export function StoryContent() {
   };
 
   // 处理审核拒绝
-  const handleReject = (id: number) => {
+  const handleReject = (id: string) => {
     setStoryData((prev) =>
       prev.map((item) =>
         item.id === id
@@ -98,7 +63,7 @@ export function StoryContent() {
   };
 
   // 处理音效删除
-  const handleRemoveSfx = (itemId: number, sfx: string) => {
+  const handleRemoveSfx = (itemId: string, sfx: string) => {
     let item = storyData.find((item) => item.id === itemId);
     if (item) {
       let sfxMetaId = item.sfxMetaId;
