@@ -6,7 +6,7 @@ import { SfxTag } from '../SfxTag';
 import { useUiStore } from '@/lib/store/useUiStore';
 
 // TextItem 组件 - 展示文本内容
-export const TextItem = ({ content, sfxMeta, onRemoveSfx, highlight }: TextItemProps) => {
+export const TextItem = ({ content, sfxMeta, onRemoveSfx, highlight, role }: TextItemProps) => {
   const { isShowSfxAddress } = useUiStore();
 
   const renderContent = () => {
@@ -39,8 +39,7 @@ export const TextItem = ({ content, sfxMeta, onRemoveSfx, highlight }: TextItemP
     <div className="flex w-full gap-2">
       <div className="flex w-1/8 self-stretch text-right font-sans text-base/6">
         <p className="flex h-full w-full items-start justify-end font-medium text-gray-700">
-          {/* {item.role} */}
-          角色
+          {role}
         </p>
       </div>
       <div className="flex h-full w-7/8 border-l-2 border-gray-300 pl-3">{renderContent()}</div>

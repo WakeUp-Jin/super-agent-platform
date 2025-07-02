@@ -20,6 +20,7 @@ export const ReviewCard = ({
       return (
         <TextItem
           content={content as string}
+          role={item.role}
           sfxMeta={sfxMeta}
           onRemoveSfx={(sfx) => onRemoveSfx?.(item.id, sfx)}
           // highlight={highlight}

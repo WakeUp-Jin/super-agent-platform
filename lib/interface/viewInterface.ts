@@ -5,6 +5,14 @@ export interface ViewRequestInterface {
   viewStep: string; // 视图步骤
 }
 
+//更新画本数据请求接口参数
+export interface UpdateViewRequestInterface {
+  sessionId: string;
+  userId: string;
+  path: string;
+  approved: boolean;
+}
+
 //视图画本的结构-第一步
 export interface ViewBoardStoryOneInterface {
   title: string;

@@ -1,6 +1,8 @@
 import { useState, useCallback } from 'react';
 import { sendMessageStreamReadable } from './stream';
 import { SendMessageRequest, StreamEventData, AgentEventData } from './interface/chatInterface';
+import { useViewBoardStore } from './store/useViewBoardStore';
+import { getView } from './api/view';
 
 export interface Message {
   id: string;
@@ -69,7 +71,12 @@ export function useChatStream() {
 
   // 处理自定义事件
   const handleCustomEvent = useCallback(
-    (data: StreamEventData, agentStates: Map<string, AgentEventData>, messageId: string) => {
+    (
+      data: StreamEventData,
+      agentStates: Map<string, AgentEventData>,
+      messageId: string,
+      request: SendMessageRequest
+    ) => {
       const eventData = data.data as AgentEventData;
 
       if (!eventData?.agentId) return null;
@@ -77,6 +84,26 @@ export function useChatStream() {
       // 更新 agent 状态
       agentStates.set(eventData.agentId, eventData);
       updateAssistantAgentStates(messageId, agentStates);
+
+      //处理编辑节点
+      if (eventData.agentId.includes('editAgentNode') && eventData.shouldQueryRedis === '2') {
+        const { setBoard } = useViewBoardStore.getState();
+        const { userId, sessionId } = request.inputParam;
+
+        // 直接使用 async/await，无需包装函数
+        getView({
+          sessionId: sessionId || '456-debug3-800',
+          userId: userId || '123',
+          viewStep: '1',
+        })
+          .then((data) => {
+            console.log('编辑节点更新画本数据:', data);
+            setBoard(data);
+          })
+          .catch((error) => {
+            console.error('获取画本数据失败:', error);
+          });
+      }
 
       // 处理聊天节点的完成状态
       if (
@@ -94,12 +121,17 @@ export function useChatStream() {
 
   // 处理流数据的主函数
   const handleStreamData = useCallback(
-    (data: StreamEventData, agentStates: Map<string, AgentEventData>, messageId: string) => {
+    (
+      data: StreamEventData,
+      agentStates: Map<string, AgentEventData>,
+      messageId: string,
+      request: SendMessageRequest
+    ) => {
       console.log('收到流数据:', data);
 
       switch (data.event) {
         case 'on_custom_event':
-          return handleCustomEvent(data, agentStates, messageId);
+          return handleCustomEvent(data, agentStates, messageId, request);
 
         case 'stream_end':
           console.log('流传输结束:', data.data?.message);
@@ -137,7 +169,12 @@ export function useChatStream() {
           request,
           // 流数据处理器
           (data: StreamEventData) => {
-            const assistantContent = handleStreamData(data, agentStates, assistantMessageId);
+            const assistantContent = handleStreamData(
+              data,
+              agentStates,
+              assistantMessageId,
+              request
+            );
             if (assistantContent) {
               updateAssistantMessage(assistantMessageId, assistantContent);
             }

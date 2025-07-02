@@ -31,6 +31,7 @@ export const StoryItemComponent = ({
 
     // normal 或 reviewed 状态，根据 type 决定渲染什么内容组件
     let finalContent = item.originValue;
+    let role = item.role;
 
     if (item.status === 'reviewed') {
       finalContent = item.peopleSelectValue === 'originValue' ? item.originValue : item.updateValue;
@@ -41,6 +42,7 @@ export const StoryItemComponent = ({
         <div className="relative h-full w-full">
           <TextItem
             content={finalContent as string}
+            role={role}
             sfxMeta={sfxMeta}
             onRemoveSfx={(sfx) => onRemoveSfx(item.id, sfx)}
           />

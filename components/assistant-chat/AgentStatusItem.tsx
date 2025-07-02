@@ -1,113 +1,127 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   CheckCircle,
+  ChevronDown,
+  ChevronRight,
   Eye,
   HandHelping,
   Loader2,
-  Rotate3d,
   Sparkle,
   UserRoundCog,
+  LucideIcon,
 } from 'lucide-react';
 import { AgentEventData } from '@/lib/interface/chatInterface';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Button } from '@/components/ui/button';
-import { ChevronsUpDown } from 'lucide-react';
+
+// 类型定义
+type AgentOperation = 'think' | 'read' | 'edit' | 'execute';
+type AgentStatus = 'started' | 'completed' | 'pending';
 
 interface AgentStatusItemProps {
   agentData: AgentEventData;
 }
 
-export function AgentStatusItem({ agentData }: AgentStatusItemProps) {
-  const { agentId, agentName, agentOperate, status, agentDesc, agentResult } = agentData;
-  const [isOpen, setIsOpen] = useState(false);
+// 常量配置
+const AGENT_OPERATION_CONFIG: Record<AgentOperation, { icon: LucideIcon; label: string }> = {
+  think: { icon: Sparkle, label: '思考' },
+  read: { icon: Eye, label: '阅读' },
+  edit: { icon: HandHelping, label: '编辑' },
+  execute: { icon: UserRoundCog, label: '执行' },
+};
 
-  const chineseAgentOperate = (agentOperate: string | undefined) => {
-    switch (agentOperate) {
-      case 'think':
-        return '思考';
-      case 'read':
-        return '阅读';
-      case 'edit':
-        return '编辑';
-      case 'execute':
-        return '执行';
+const ICON_STYLES = {
+  operation: 'h-3 w-3 text-blue-500',
+  status: {
+    completed: 'h-3 w-3 text-green-500',
+    loading: 'h-3 w-3 animate-spin text-blue-500',
+    pending: 'h-3 w-3 rounded-full border-2 border-gray-300',
+  },
+  chevron: {
+    down: 'h-3 w-3 text-gray-500',
+    right: 'h-3 w-3 text-blue-500',
+  },
+} as const;
+
+export function AgentStatusItem({ agentData }: AgentStatusItemProps) {
+  const { agentOperate, status, agentDesc, agentResult } = agentData;
+  const [isOpen, setIsOpen] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+
+  // 获取操作配置
+  const operationConfig = AGENT_OPERATION_CONFIG[agentOperate as AgentOperation];
+
+  // 渲染操作图标
+  const renderOperationIcon = () => {
+    if (isOpen) {
+      return <ChevronDown className={ICON_STYLES.chevron.down} />;
+    }
+
+    if (isHovered) {
+      return <ChevronRight className={ICON_STYLES.chevron.right} />;
+    }
+
+    if (operationConfig) {
+      const IconComponent = operationConfig.icon;
+      return <IconComponent className={ICON_STYLES.operation} />;
+    }
+
+    return <ChevronDown className={ICON_STYLES.chevron.down} />;
+  };
+
+  // 渲染状态图标
+  const renderStatusIcon = () => {
+    switch (status) {
+      case 'completed':
+        return <CheckCircle className={ICON_STYLES.status.completed} />;
+      case 'started':
+        return <Loader2 className={ICON_STYLES.status.loading} />;
       default:
-        return '';
+        return <div className={ICON_STYLES.status.pending} />;
     }
   };
 
-  const agentTitle = agentDesc
-    ? `${agentOperate}-${agentDesc}`
-    : `${chineseAgentOperate(agentOperate)}中...`;
+  // 生成标题
+  const agentTitle = useMemo(() => {
+    if (agentDesc) {
+      return `${operationConfig.label}-${agentDesc}`;
+    }
 
-  const isCompleted = status === 'completed';
-  const isStarted = status === 'started';
+    const label = operationConfig?.label || '';
+    return label ? `${label}中...` : '';
+  }, [agentOperate, agentDesc, operationConfig]);
 
-  // 根据agentOperate 返回不同的icon
+  const handleMouseEnter = () => setIsHovered(true);
+  const handleMouseLeave = () => setIsHovered(false);
 
   return (
-    <div>
-      <Collapsible open={isOpen} onOpenChange={setIsOpen} className="flex w-[350px] flex-col gap-2">
-        <div className="flex items-center justify-between gap-4 px-4">
-          <h4 className="text-sm font-semibold">@peduarte starred 3 repositories</h4>
+    <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+      <Collapsible open={isOpen} onOpenChange={setIsOpen} className="flex w-full flex-col gap-2">
+        <div className="flex w-full">
           <CollapsibleTrigger asChild>
-            <Button variant="ghost" size="icon" className="size-8">
-              <ChevronsUpDown />
-              <span className="sr-only">Toggle</span>
-            </Button>
+            <div className="flex w-full items-center gap-3 rounded-lg border bg-gray-50 px-1 py-1">
+              <div className="flex min-w-0 flex-1 gap-2">
+                <div className="flex flex-shrink-0 items-center">{renderOperationIcon()}</div>
+
+                <div className="flex items-center gap-2">
+                  {agentTitle && (
+                    <span className="rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-700">
+                      {agentTitle}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex flex-shrink-0 items-center">{renderStatusIcon()}</div>
+            </div>
           </CollapsibleTrigger>
         </div>
-        <div className="rounded-md border px-4 py-2 font-mono text-sm">@radix-ui/primitives</div>
+
         <CollapsibleContent className="flex flex-col gap-2">
-          <div className="rounded-md border px-4 py-2 font-mono text-sm">@radix-ui/colors</div>
-          <div className="rounded-md border px-4 py-2 font-mono text-sm">@stitches/react</div>
+          {agentResult && (
+            <div className="px-4 py-2 font-mono text-sm text-gray-400">{agentResult}</div>
+          )}
         </CollapsibleContent>
       </Collapsible>
-
-      <div className="flex items-center gap-3 rounded-lg border bg-gray-50 px-3 py-2">
-        {/* 状态图标 */}
-        <div className="flex-shrink-0">
-          {agentOperate === 'think' ? (
-            <Sparkle className="h-3 w-3 text-blue-500" />
-          ) : agentOperate === 'read' ? (
-            <Eye className="h-3 w-3 text-blue-500" />
-          ) : agentOperate === 'edit' ? (
-            <HandHelping className="h-3 w-3 text-blue-500" />
-          ) : agentOperate === 'execute' ? (
-            <UserRoundCog className="h-3 w-3 text-blue-500" />
-          ) : (
-            <div className="h-3 w-3 rounded-full border-2 border-gray-300" />
-          )}
-        </div>
-
-        {/* Agent 信息 */}
-        <div className="flex min-w-0 flex-1 gap-2">
-          <div className="flex items-center gap-2">
-            {agentTitle && (
-              <span className="rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-700">
-                {agentTitle}
-              </span>
-            )}
-          </div>
-
-          {/* 状态描述 */}
-          <div className="mt-1 text-xs text-gray-600">
-            {isStarted && agentDesc && <span>{agentDesc}</span>}
-            {isCompleted && agentResult && <span className="text-green-600">{agentResult}</span>}
-          </div>
-        </div>
-
-        {/* 状态文本 */}
-        <div className="flex-shrink-0 text-xs text-gray-500">
-          {isCompleted ? (
-            <CheckCircle className="h-3 w-3 text-green-500" />
-          ) : isStarted ? (
-            <Loader2 className="h-3 w-3 animate-spin text-blue-500" />
-          ) : (
-            <div className="h-3 w-3 rounded-full border-2 border-gray-300" />
-          )}
-        </div>
-      </div>
     </div>
   );
 }

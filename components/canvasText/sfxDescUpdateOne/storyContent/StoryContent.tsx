@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { StoryItem, SfxMeta } from '@/lib/interface/viewInterface';
 import { StoryItemComponent } from './StoryItemComponent';
 import { useViewBoardStore } from '@/lib/store/useViewBoardStore';
-import { getView } from '@/lib/api/view';
+import { getView, updateView } from '@/lib/api/view';
 
 export function StoryContent() {
   const { board, setBoard } = useViewBoardStore();
@@ -12,8 +12,8 @@ export function StoryContent() {
   useEffect(() => {
     const fetchData = async () => {
       const data = await getView({
-        sessionId: '456-debug3-800',
         userId: '123',
+        sessionId: '456',
         viewStep: '1',
       });
       console.log(data);
@@ -45,6 +45,22 @@ export function StoryContent() {
           : item
       )
     );
+
+    let item = storyData.find((item) => item.id === id);
+    if (item) {
+      updateView({
+        sessionId: '456',
+        userId: '123',
+        path: item.sfxPath ?? '',
+        approved: true,
+      })
+        .then((res) => {
+          console.log('更新后端画本数据成功', res);
+        })
+        .catch((err) => {
+          console.log('更新后端画本数据失败', err);
+        });
+    }
   };
 
   // 处理审核拒绝
@@ -60,6 +76,21 @@ export function StoryContent() {
           : item
       )
     );
+    let item = storyData.find((item) => item.id === id);
+    if (item) {
+      updateView({
+        sessionId: '456',
+        userId: '123',
+        path: item.sfxPath ?? '',
+        approved: false,
+      })
+        .then((res) => {
+          console.log('更新后端画本数据成功', res);
+        })
+        .catch((err) => {
+          console.log('更新后端画本数据失败', err);
+        });
+    }
   };
 
   // 处理音效删除

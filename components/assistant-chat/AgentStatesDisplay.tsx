@@ -1,5 +1,5 @@
 import React from 'react';
-import { AgentStatusItem } from './AgentStatusItem2';
+import { AgentStatusItem } from './AgentStatusItem';
 import { AgentEventData } from '@/lib/interface/chatInterface';
 
 interface AgentStatesDisplayProps {

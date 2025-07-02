@@ -8,6 +8,7 @@ export interface SfxTagProps {
 export interface TextItemProps {
   content: string;
   sfxMeta?: SfxMeta;
+  role?: string;
   onRemoveSfx?: (sfx: string) => void;
   highlight?: boolean;
   isShowSfxAddress?: boolean;
