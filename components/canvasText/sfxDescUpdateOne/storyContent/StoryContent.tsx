@@ -9,18 +9,18 @@ export function StoryContent() {
   const { board, setBoard } = useViewBoardStore();
 
   // 首次挂载时拉取数据
-  useEffect(() => {
-    const fetchData = async () => {
-      const data = await getView({
-        userId: '123',
-        sessionId: '456',
-        viewStep: '1',
-      });
-      console.log(data);
-      setBoard(data);
-    };
-    fetchData();
-  }, [setBoard]);
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     const data = await getView({
+  //       userId: '123',
+  //       sessionId: '456',
+  //       viewStep: '1',
+  //     });
+  //     console.log(data);
+  //     setBoard(data);
+  //   };
+  //   fetchData();
+  // }, [setBoard]);
 
   // 从全局 store 拿到 storyData / sfxMeta
   const [storyData, setStoryData] = useState<StoryItem[]>([]);

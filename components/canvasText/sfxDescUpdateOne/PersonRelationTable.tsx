@@ -1,4 +1,7 @@
+import { PersonRelationFormat } from '@/lib/interface/viewInterface';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../ui/table';
+import { useViewBoardStore } from '@/lib/store/useViewBoardStore';
+import { useEffect, useState } from 'react';
 
 const personRelation = [
   {
@@ -28,6 +31,13 @@ const personRelation = [
 ];
 
 export function PersonRelationTable() {
+  const { board } = useViewBoardStore();
+  const [personRelation, setPersonRelation] = useState<PersonRelationFormat[]>([]);
+
+  useEffect(() => {
+    setPersonRelation(board?.personRelation ?? []);
+  }, [board]);
+
   return (
     <Table>
       {/* <TableCaption>A list of your recent invoices.</TableCaption> */}

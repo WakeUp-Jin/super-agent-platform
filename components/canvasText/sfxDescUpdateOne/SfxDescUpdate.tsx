@@ -11,9 +11,34 @@ import { PersonRelationTable } from './PersonRelationTable';
 import { Eye, EyeClosed, PlusIcon } from 'lucide-react';
 import { useUiStore } from '@/lib/store/useUiStore';
 import { TooltipContent, TooltipTrigger, Tooltip, TooltipProvider } from '@/components/ui/tooltip';
+import { useEffect, useState } from 'react';
+import { useViewBoardStore } from '@/lib/store/useViewBoardStore';
+import { getView } from '@/lib/api/view';
 
 export function SfxDescUpdate() {
   const { isShowSfxAddress, toggleSfxAddress } = useUiStore();
+  const { board, setBoard } = useViewBoardStore();
+
+  // 首次挂载时拉取数据
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await getView({
+        userId: '123',
+        sessionId: '456',
+        viewStep: '1',
+      });
+      console.log(data);
+      setBoard(data);
+    };
+    fetchData();
+  }, [setBoard]);
+
+  //标题
+  const [title, setTitle] = useState('');
+
+  useEffect(() => {
+    setTitle(board?.title ?? '');
+  }, [board]);
 
   return (
     <div className="w-full">
@@ -22,7 +47,7 @@ export function SfxDescUpdate() {
           <div className="flex w-full flex-col gap-3">
             {/* 画本标题 */}
             <div id="title">
-              <p className="text-2xl font-bold">画本</p>
+              <p className="text-2xl font-bold">{title}</p>
             </div>
             <Separator className="my-2" />
 

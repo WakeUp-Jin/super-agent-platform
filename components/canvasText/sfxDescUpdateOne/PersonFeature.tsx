@@ -8,6 +8,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { PersonFeatureFmormat } from '@/lib/interface/viewInterface';
+import { useViewBoardStore } from '@/lib/store/useViewBoardStore';
+import { useEffect, useState } from 'react';
 
 const invoices = [
   {
@@ -27,6 +30,14 @@ const invoices = [
 ];
 
 export function PersonFeature() {
+  const { board } = useViewBoardStore();
+
+  const [personFeature, setPersonFeature] = useState<PersonFeatureFmormat[]>([]);
+
+  useEffect(() => {
+    setPersonFeature(board?.personFeature ?? []);
+  }, [board]);
+
   return (
     <Table>
       {/* <TableCaption>A list of your recent invoices.</TableCaption> */}
@@ -40,7 +51,7 @@ export function PersonFeature() {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {invoices.map((invoice) => (
+        {personFeature.map((invoice) => (
           <TableRow key={invoice.name}>
             <TableCell className="font-medium">{invoice.name}</TableCell>
             <TableCell>{invoice.age}</TableCell>
