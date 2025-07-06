@@ -19,7 +19,7 @@ export interface AgentEventData {
   status: 'started' | 'completed';
   agentDesc?: string;
   agentResult?: string;
-  chatAgentContent?: string;
+  chatAgentContent?: any;
   shouldQueryRedis?: string;
   timestamp: string;
 }

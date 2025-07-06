@@ -111,7 +111,7 @@ export function useChatStream() {
         eventData.status === 'completed' &&
         eventData.chatAgentContent
       ) {
-        return eventData.chatAgentContent;
+        return eventData.chatAgentContent.text;
       }
 
       return null;
