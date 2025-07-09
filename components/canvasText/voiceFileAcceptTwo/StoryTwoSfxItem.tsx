@@ -53,7 +53,7 @@ export function StoryTwoSfxItem({
             </div>
 
             {/* 状态汇总 */}
-            <div className="flex items-center gap-1">
+            {/* <div className="flex items-center gap-1">
               {sfxItem.valuesList.some((v) => v.status === 'pending') && (
                 <span className="rounded bg-yellow-100 px-2 py-1 text-xs text-yellow-700">
                   {sfxItem.valuesList.filter((v) => v.status === 'pending').length} 待审核
@@ -64,7 +64,7 @@ export function StoryTwoSfxItem({
                   {sfxItem.valuesList.filter((v) => v.status === 'reviewed').length} 已审核
                 </span>
               )}
-            </div>
+            </div> */}
           </div>
 
           <div className="flex items-center gap-1">

@@ -78,44 +78,52 @@ export function StoryTwoContainer({
     if (storyItem.status === 'pending') {
       // pending状态：4个按钮（2个播放 + 2个审核）
       return (
-        <div className="flex items-center gap-2">
-          {/* 原始版本播放按钮 */}
-          <Button variant="ghost" size="icon" className="text-red-500 hover:bg-blue-100">
-            <Play className="h-4 w-4" />
-          </Button>
-          <span className="text-xs text-red-500">原始</span>
+        <div className="flex items-center gap-4">
+          {/* 播放按钮组 */}
+          <div className="flex items-center gap-2">
+            {/* 原始版本播放按钮 */}
+            <Button variant="ghost" size="sm" className="h-8 px-2 text-red-500 hover:bg-red-50">
+              <Play className="h-3 w-3" />
+            </Button>
 
-          {/* 更新版本播放按钮 */}
-          <Button variant="ghost" size="icon" className="text-green-500 hover:bg-purple-100">
-            <Play className="h-4 w-4" />
-          </Button>
-          <span className="text-xs text-green-500">更新</span>
+            {/* 更新版本播放按钮 */}
+            <Button variant="ghost" size="sm" className="h-8 px-2 text-green-500 hover:bg-green-50">
+              <Play className="h-3 w-3" />
+            </Button>
+          </div>
 
-          {/* 审核按钮 */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-green-600 hover:bg-green-100"
-            onClick={handleStoryApprove}
-          >
-            <Check className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-red-600 hover:bg-red-100"
-            onClick={handleStoryReject}
-          >
-            <X className="h-4 w-4" />
-          </Button>
+          {/* 分隔符 */}
+          <div className="h-4 w-px bg-gray-300"></div>
+
+          {/* 审核按钮组 */}
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 min-w-[60px] px-3 text-green-600 hover:bg-green-50"
+              onClick={handleStoryApprove}
+            >
+              <Check className="mr-1 h-3 w-3" />
+              同意
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 min-w-[60px] px-3 text-red-600 hover:bg-red-50"
+              onClick={handleStoryReject}
+            >
+              <X className="mr-1 h-3 w-3" />
+              拒绝
+            </Button>
+          </div>
         </div>
       );
     } else {
       // normal/reviewed状态：只有播放按钮
       return (
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon">
-            <Play className="h-4 w-4" />
+          <Button variant="ghost" size="sm" className="h-8 px-2">
+            <Play className="h-3 w-3" />
           </Button>
         </div>
       );
