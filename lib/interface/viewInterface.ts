@@ -73,3 +73,40 @@ export interface StoryItem {
   sfxMetaId?: string; // 关联的音效描述位置ID-只要type为sfx这个就一定要有
   sfxPath?: string;
 }
+
+//========== 视图画本的结构-第二步==========
+export interface ViewBoardStoryTwoInterface {
+  id: string;
+  status: 'normal' | 'pending' | 'reviewed';
+  originValue: ViewTwoValueItemFormat;
+  updateValue: ViewTwoValueItemFormat;
+  peopleSelectValue: 'originValue' | 'updateValue' | '';
+  items: (ViewTwoTextItemFormat | ViewTwoSfxItemFormat)[];
+}
+
+export interface ViewTwoValueItemFormat {
+  name: string;
+  url: string;
+}
+
+// 视图画本的结构-第二步-文本项
+export interface ViewTwoTextItemFormat {
+  type: 'text';
+  status: 'normal' | 'pending' | 'reviewed';
+  originValue: ViewTwoValueItemFormat;
+  updateValue: ViewTwoValueItemFormat;
+  peopleSelectValue: 'originValue' | 'updateValue' | '';
+}
+
+export interface ViewTwoSfxItemFormat {
+  type: 'sfx';
+  title: string;
+  valuesList: ViewTwoSfxValueItemFormat[];
+}
+
+export interface ViewTwoSfxValueItemFormat {
+  originValue: ViewTwoValueItemFormat;
+  updateValue: ViewTwoValueItemFormat;
+  peopleSelectValue: 'originValue' | 'updateValue' | '';
+  status: 'normal' | 'pending' | 'reviewed';
+}

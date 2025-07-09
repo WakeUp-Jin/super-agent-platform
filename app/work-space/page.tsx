@@ -50,8 +50,8 @@ export default function ResizablePanels() {
       <ResizableHandle withHandle />
       <ResizablePanel defaultSize={65}>
         <div className="flex h-full w-full p-5">
-          <SfxDescUpdate></SfxDescUpdate>
-          {/* <VoiceFileAccept></VoiceFileAccept> */}
+          {/* <SfxDescUpdate></SfxDescUpdate> */}
+          <VoiceFileAccept></VoiceFileAccept>
         </div>
       </ResizablePanel>
     </ResizablePanelGroup>
