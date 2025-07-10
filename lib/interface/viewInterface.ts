@@ -82,6 +82,12 @@ export interface StoryItem {
 }
 
 //========== 视图画本的结构-第二步==========
+
+export interface ViewBoardStoryTwoInfo {
+  title?: string;
+  storyData?: ViewBoardStoryTwoInterface[];
+}
+
 export interface ViewBoardStoryTwoInterface {
   id: string;
   status: 'normal' | 'pending' | 'reviewed';

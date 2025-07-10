@@ -30,7 +30,7 @@ export function StoryTwoContainer({
   // 根据status确定容器样式
   const getContainerStyle = () => {
     if (storyItem.status === 'pending') {
-      return 'bg-gray-200 border-l-4 border-red-400';
+      return 'bg-gray-100 border-l-4';
     }
     return 'bg-gray-200';
   };
@@ -38,7 +38,7 @@ export function StoryTwoContainer({
   // 根据status确定标题样式
   const getTitleStyle = () => {
     if (storyItem.status === 'pending') {
-      return 'text-red-700';
+      return '';
     }
     return 'text-gray-700';
   };

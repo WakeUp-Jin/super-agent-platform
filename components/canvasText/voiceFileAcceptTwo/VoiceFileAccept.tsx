@@ -1,13 +1,36 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { mockViewBoardStoryTwoData } from '@/lib/mock/viewBoardStoryTwoData';
 import { ViewBoardStoryTwoInterface } from '@/lib/interface/viewInterface';
 import { StoryTwoContainer } from './StoryTwoContainer';
+import { useViewBoardTwoStore } from '@/lib/store/useViewBoardStore';
+import { getView } from '@/lib/api/view';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export function VoiceFileAccept() {
   const [storyData, setStoryData] =
     useState<ViewBoardStoryTwoInterface[]>(mockViewBoardStoryTwoData);
+
+  const { boardTwo, setBoardTwo, updateBoardTwo, clearBoardTwo } = useViewBoardTwoStore();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await getView({
+        userId: '123',
+        sessionId: '456',
+        viewStep: '2',
+      });
+      console.log(data);
+
+      setBoardTwo({ storyData: data, title: '' });
+    };
+    fetchData();
+  }, [setBoardTwo]);
+
+  useEffect(() => {
+    setStoryData(boardTwo?.storyData ?? []);
+  }, [boardTwo]);
 
   // 处理故事级别的审核同意
   const handleStoryApprove = (storyIndex: number) => {
@@ -130,24 +153,26 @@ export function VoiceFileAccept() {
   };
 
   return (
-    <div className="flex w-full flex-col gap-4 p-4">
-      <div className="text-lg font-bold text-gray-800">声音文件审核</div>
+    <div className="flex w-full flex-col gap-4 p-1">
+      <ScrollArea className="h-full w-full pr-3">
+        <div className="text-lg font-bold text-gray-800">声音文件审核</div>
 
-      <div className="flex flex-col gap-3">
-        {storyData.map((story, index) => (
-          <StoryTwoContainer
-            key={index}
-            storyItem={story}
-            index={index}
-            onStoryApprove={handleStoryApprove}
-            onStoryReject={handleStoryReject}
-            onTextApprove={handleTextApprove}
-            onTextReject={handleTextReject}
-            onSfxApprove={handleSfxApprove}
-            onSfxReject={handleSfxReject}
-          />
-        ))}
-      </div>
+        <div className="flex flex-col gap-3">
+          {storyData.map((story, index) => (
+            <StoryTwoContainer
+              key={index}
+              storyItem={story}
+              index={index}
+              onStoryApprove={handleStoryApprove}
+              onStoryReject={handleStoryReject}
+              onTextApprove={handleTextApprove}
+              onTextReject={handleTextReject}
+              onSfxApprove={handleSfxApprove}
+              onSfxReject={handleSfxReject}
+            />
+          ))}
+        </div>
+      </ScrollArea>
     </div>
   );
 }
