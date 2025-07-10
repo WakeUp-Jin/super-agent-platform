@@ -28,6 +28,7 @@ export function StoryTwoContainer({
   onSfxReject,
 }: StoryTwoContainerProps) {
   // 根据status确定容器样式
+
   const getContainerStyle = () => {
     if (storyItem.status === 'pending') {
       return 'bg-gray-100 border-l-4';
