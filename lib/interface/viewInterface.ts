@@ -9,8 +9,8 @@ export interface ViewRequestInterface {
 export interface UpdateViewRequestInterface {
   sessionId: string;
   userId: string;
-  path: string;
-  sfxAddressPath: string;
+  path: string | string[];
+  sfxAddressPath?: string;
   approved: boolean;
 }
 
@@ -93,6 +93,7 @@ export interface ViewBoardStoryTwoInterface {
   status: 'normal' | 'pending' | 'reviewed';
   originValue: ViewTwoValueItemFormat;
   updateValue: ViewTwoValueItemFormat;
+  bgmFilePath?: string[];
   peopleSelectValue: 'originValue' | 'updateValue' | '';
   items: (ViewTwoTextItemFormat | ViewTwoSfxItemFormat)[];
 }
@@ -108,6 +109,7 @@ export interface ViewTwoTextItemFormat {
   status: 'normal' | 'pending' | 'reviewed';
   originValue: ViewTwoValueItemFormat;
   updateValue: ViewTwoValueItemFormat;
+  audioFilePath?: string;
   peopleSelectValue: 'originValue' | 'updateValue' | '';
 }
 
@@ -122,4 +124,5 @@ export interface ViewTwoSfxValueItemFormat {
   updateValue: ViewTwoValueItemFormat;
   peopleSelectValue: 'originValue' | 'updateValue' | '';
   status: 'normal' | 'pending' | 'reviewed';
+  sfxFilePath?: string[];
 }
