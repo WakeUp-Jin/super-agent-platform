@@ -3,24 +3,10 @@ import React, { useEffect, useState } from 'react';
 import { StoryItem, SfxMeta } from '@/lib/interface/viewInterface';
 import { StoryItemComponent } from './StoryItemComponent';
 import { useViewBoardStore } from '@/lib/store/useViewBoardStore';
-import { getView, updateView } from '@/lib/api/view';
+import { createBoardStoryDiff, getView, updateView } from '@/lib/api/view';
 
 export function StoryContent() {
   const { board, setBoard } = useViewBoardStore();
-
-  // 首次挂载时拉取数据
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     const data = await getView({
-  //       userId: '123',
-  //       sessionId: '456',
-  //       viewStep: '1',
-  //     });
-  //     console.log(data);
-  //     setBoard(data);
-  //   };
-  //   fetchData();
-  // }, [setBoard]);
 
   // 从全局 store 拿到 storyData / sfxMeta
   const [storyData, setStoryData] = useState<StoryItem[]>([]);
@@ -30,6 +16,35 @@ export function StoryContent() {
     setStoryData(board?.audioScript?.storyItems ?? []);
     setSfxMeta(board?.audioScript?.sfxMetas ?? []);
   }, [board]);
+
+  // 检查是否所有审核都已完成
+  const checkAllReviewCompleted = (currentStoryData: StoryItem[]) => {
+    const allNotPending = currentStoryData.every((item) => item.status !== 'pending');
+    const isExitSfx = currentStoryData.some((item) => item.type === 'sfx');
+    if (allNotPending && isExitSfx) {
+      // TODO: 在这里添加修改画本的请求
+      // 所有审核已完成，发起修改画本请求
+      console.log(currentStoryData);
+      console.log('所有审核已完成，准备发起修改画本请求');
+      createBoardStoryDiff({
+        sessionId: '456',
+        userId: '123',
+      })
+        .then((res) => {
+          console.log('更新后端画本数据成功', res);
+        })
+        .catch((err) => {
+          console.log('更新后端画本数据失败', err);
+        });
+    }
+  };
+
+  // 监听storyData变化，检查是否所有审核都已完成
+  useEffect(() => {
+    if (storyData.length > 0) {
+      checkAllReviewCompleted(storyData);
+    }
+  }, [storyData]);
 
   // 当全局 board 更新时同步本地可编辑 state
   // 处理审核同意
@@ -48,10 +63,12 @@ export function StoryContent() {
 
     let item = storyData.find((item) => item.id === id);
     if (item) {
+      let sfxMetaResult = sfxMeta.find((desc) => desc.id === item.sfxMetaId);
       updateView({
         sessionId: '456',
         userId: '123',
         path: item.sfxPath ?? '',
+        sfxAddressPath: sfxMetaResult?.sfxAddressPath ?? '',
         approved: true,
       })
         .then((res) => {
@@ -78,10 +95,12 @@ export function StoryContent() {
     );
     let item = storyData.find((item) => item.id === id);
     if (item) {
+      let sfxMetaResult = sfxMeta.find((desc) => desc.id === item.sfxMetaId);
       updateView({
         sessionId: '456',
         userId: '123',
         path: item.sfxPath ?? '',
+        sfxAddressPath: sfxMetaResult?.sfxAddressPath ?? '',
         approved: false,
       })
         .then((res) => {

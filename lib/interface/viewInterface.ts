@@ -10,7 +10,14 @@ export interface UpdateViewRequestInterface {
   sessionId: string;
   userId: string;
   path: string;
+  sfxAddressPath: string;
   approved: boolean;
+}
+
+//审核完成-更新画本数据请求接口参数
+export interface CreateBoardStoryDiffRequestInterface {
+  sessionId: string;
+  userId: string;
 }
 
 //视图画本的结构-第一步
