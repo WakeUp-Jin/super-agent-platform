@@ -6,13 +6,17 @@ import { mockViewBoardStoryTwoData } from '@/lib/mock/viewBoardStoryTwoData';
 import { ViewBoardStoryTwoInterface, ViewTwoSfxItemFormat } from '@/lib/interface/viewInterface';
 import { StoryTwoContainer } from './StoryTwoContainer';
 import { useViewBoardTwoStore } from '@/lib/store/useViewBoardStore';
+import { useAudioPlayerStore } from '@/lib/store/useAudioPlayerStore';
 import { getView, updateView } from '@/lib/api/view';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { motion, AnimatePresence } from 'motion/react';
+import { PlayerAudio } from '@/components/common/PlayerAudio';
 
 export function VoiceFileAccept() {
   const [storyData, setStoryData] = useState<ViewBoardStoryTwoInterface[]>([]);
 
   const { boardTwo, setBoardTwo, updateBoardTwo, clearBoardTwo } = useViewBoardTwoStore();
+  const { isBottomPanelVisible, toggleBottomPanel } = useAudioPlayerStore();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -161,26 +165,50 @@ export function VoiceFileAccept() {
   };
 
   return (
-    <div className="flex w-full flex-col gap-4 p-1">
-      <ScrollArea className="h-full w-full pr-3">
-        <div className="text-lg font-bold text-gray-800">声音文件审核</div>
-
-        <div className="flex flex-col gap-3">
-          {storyData.map((story, index) => (
-            <StoryTwoContainer
-              key={index}
-              storyItem={story}
-              index={index}
-              onStoryApprove={handleStoryApprove}
-              onStoryReject={handleStoryReject}
-              onTextApprove={handleTextApprove}
-              onTextReject={handleTextReject}
-              onSfxApprove={handleSfxApprove}
-              onSfxReject={handleSfxReject}
-            />
-          ))}
-        </div>
-      </ScrollArea>
+    <div className="flex h-full w-full flex-col gap-4 overflow-hidden p-1">
+      <div className="flex-1 overflow-hidden">
+        <ScrollArea className="h-full w-full pr-3">
+          <div
+            className="cursor-pointer text-lg font-bold text-gray-800 transition-colors duration-200 hover:text-blue-600"
+            onClick={toggleBottomPanel}
+          >
+            声音文件审核
+          </div>
+          <div className="flex flex-col gap-3">
+            {storyData.map((story, index) => (
+              <StoryTwoContainer
+                key={index}
+                storyItem={story}
+                index={index}
+                onStoryApprove={handleStoryApprove}
+                onStoryReject={handleStoryReject}
+                onTextApprove={handleTextApprove}
+                onTextReject={handleTextReject}
+                onSfxApprove={handleSfxApprove}
+                onSfxReject={handleSfxReject}
+              />
+            ))}
+          </div>
+        </ScrollArea>
+      </div>
+      <AnimatePresence>
+        {isBottomPanelVisible && (
+          <motion.div
+            className="w-ful"
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{
+              y: { type: 'spring', stiffness: 400, damping: 30 },
+              opacity: { duration: 0.2 },
+            }}
+          >
+            <div className="p-1 text-center text-white">
+              <PlayerAudio />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

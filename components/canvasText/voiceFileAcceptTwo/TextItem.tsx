@@ -1,9 +1,29 @@
 'use client';
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { PencilLine, Play, Check, X } from 'lucide-react';
-import { ViewTwoTextItemFormat } from '@/lib/interface/viewInterface';
+import { ViewTwoTextItemFormat, ViewTwoValueItemFormat } from '@/lib/interface/viewInterface';
+import { useAudioPlayerStore } from '@/lib/store/useAudioPlayerStore';
 
+// 常量定义
+const CONTAINER_STYLES = {
+  base: 'group rounded-xl bg-white hover:bg-gray-50 border-l-2 border-blue-400',
+} as const;
+
+const BUTTON_STYLES = {
+  playOriginal: 'text-red-500 hover:bg-blue-100',
+  playUpdate: 'text-green-500 hover:bg-purple-100',
+  playDefault: 'opacity-0 transition-opacity group-hover:opacity-100',
+  approve: 'h-4 text-green-600 hover:bg-green-100',
+  reject: 'h-4 text-red-600 hover:bg-red-100',
+} as const;
+
+const VERSION_LABELS = {
+  original: '原始版本',
+  updated: '更新版本',
+} as const;
+
+// 类型定义
 interface TextItemProps {
   textItem: ViewTwoTextItemFormat;
   index: number;
@@ -12,159 +32,162 @@ interface TextItemProps {
   onReject?: (itemIndex: number) => void;
 }
 
-export function TextItem({ textItem, index, parentStatus, onApprove, onReject }: TextItemProps) {
-  // 根据status确定背景颜色
-  const getBackgroundColor = () => {
-    return 'bg-white hover:bg-gray-50';
-  };
+// 播放按钮组件
+interface PlayButtonProps {
+  value: ViewTwoValueItemFormat;
+  className?: string;
+  onClick: () => void;
+}
 
-  // 根据选择值确定显示的文本
-  const getDisplayText = () => {
+const PlayButton: React.FC<PlayButtonProps> = ({ value, className, onClick }) => (
+  <Button
+    variant="ghost"
+    size="icon"
+    className={className}
+    onClick={onClick}
+    title={`播放: ${value.name}`}
+  >
+    <Play className="h-4 w-4" />
+  </Button>
+);
+
+// 编辑按钮组件
+const EditButton: React.FC<{ className?: string }> = ({ className }) => (
+  <Button variant="ghost" size="icon" className={className} title="编辑">
+    <PencilLine className="h-4 w-4" />
+  </Button>
+);
+
+// 审核按钮组件
+interface ActionButtonProps {
+  type: 'approve' | 'reject';
+  onClick: () => void;
+}
+
+const ActionButton: React.FC<ActionButtonProps> = ({ type, onClick }) => (
+  <Button
+    variant="ghost"
+    size="sm"
+    className={type === 'approve' ? BUTTON_STYLES.approve : BUTTON_STYLES.reject}
+    onClick={onClick}
+  >
+    {type === 'approve' ? (
+      <>
+        <Check className="mr-1 h-3 w-3" />
+        同意
+      </>
+    ) : (
+      <>
+        <X className="mr-1 h-3 w-3" />
+        拒绝
+      </>
+    )}
+  </Button>
+);
+
+export const TextItem: React.FC<TextItemProps> = ({
+  textItem,
+  index,
+  parentStatus,
+  onApprove,
+  onReject,
+}) => {
+  const { playAudio } = useAudioPlayerStore();
+
+  // 计算当前显示的值 - 使用 useMemo 优化
+  const currentValue = useMemo((): ViewTwoValueItemFormat => {
     if (textItem.status === 'normal') {
-      // normal状态默认显示originValue
-      return textItem.originValue.name;
-    } else if (textItem.status === 'reviewed') {
-      // reviewed状态根据peopleSelectValue决定
-      if (textItem.peopleSelectValue === 'originValue') {
-        return textItem.originValue.name;
-      } else if (textItem.peopleSelectValue === 'updateValue') {
-        return textItem.updateValue.name;
-      }
-    } else if (textItem.status === 'pending') {
-      // pending状态根据peopleSelectValue决定，默认显示originValue
-      if (textItem.peopleSelectValue === 'updateValue') {
-        return textItem.updateValue.name;
-      } else {
-        return textItem.originValue.name;
-      }
+      return textItem.originValue;
     }
-    return textItem.originValue.name;
-  };
 
-  // 根据选择值确定边框样式
-  const getBorderStyle = () => {
+    // pending和reviewed状态都根据peopleSelectValue决定
+    return textItem.peopleSelectValue === 'updateValue'
+      ? textItem.updateValue
+      : textItem.originValue;
+  }, [textItem.status, textItem.peopleSelectValue, textItem.originValue, textItem.updateValue]);
+
+  // 计算版本标签 - 使用 useMemo 优化
+  const versionLabel = useMemo((): string => {
     if (textItem.status === 'normal') {
-      // normal状态默认蓝色边框（originValue）
-      return 'border-l-2 border-blue-400';
-    } else if (textItem.status === 'reviewed') {
-      // reviewed状态根据peopleSelectValue决定
-      if (textItem.peopleSelectValue === 'updateValue') {
-        return 'border-l-2 border-blue-400';
-      } else {
-        return 'border-l-2 border-blue-400';
-      }
-    } else if (textItem.status === 'pending') {
-      // pending状态根据peopleSelectValue决定
-      if (textItem.peopleSelectValue === 'updateValue') {
-        return 'border-l-2 border-blue-400';
-      } else {
-        return 'border-l-2 border-blue-400';
-      }
+      return VERSION_LABELS.original;
     }
-    return 'border-l-2 border-gray-300';
-  };
 
-  // 获取版本标签
-  const getVersionLabel = () => {
-    if (textItem.status === 'normal') {
-      return '原始版本';
-    } else if (textItem.status === 'reviewed') {
-      if (textItem.peopleSelectValue === 'updateValue') {
-        return '更新版本';
-      } else {
-        return '原始版本';
-      }
-    } else if (textItem.status === 'pending') {
-      if (textItem.peopleSelectValue === 'updateValue') {
-        return '更新版本';
-      } else {
-        return '原始版本';
-      }
-    }
-    return '';
-  };
+    return textItem.peopleSelectValue === 'updateValue'
+      ? VERSION_LABELS.updated
+      : VERSION_LABELS.original;
+  }, [textItem.status, textItem.peopleSelectValue]);
 
-  // 处理审核同意
-  const handleApprove = () => {
+  // 事件处理函数 - 使用 useCallback 优化
+  const handlePlay = useCallback(
+    (value: ViewTwoValueItemFormat) => {
+      if (value.url) {
+        playAudio(value.url, {
+          title: value.name,
+          type: 'voice',
+          itemIndex: index,
+        });
+      }
+    },
+    [playAudio, index]
+  );
+
+  const handleApprove = useCallback(() => {
     onApprove?.(index);
-  };
+  }, [onApprove, index]);
 
-  // 处理审核拒绝
-  const handleReject = () => {
+  const handleReject = useCallback(() => {
     onReject?.(index);
-  };
+  }, [onReject, index]);
 
-  // 渲染播放按钮区域
-  const renderPlayButtons = () => {
-    if (textItem.status === 'pending') {
-      // pending状态：两个播放按钮（红色和绿色，无文字）
-      return (
-        <div className="flex items-center gap-1">
-          {/* 原始版本播放按钮 */}
-          <Button variant="ghost" size="icon" className="text-red-500 hover:bg-blue-100">
-            <Play className="h-4 w-4" />
-          </Button>
-
-          {/* 更新版本播放按钮 */}
-          <Button variant="ghost" size="icon" className="text-green-500 hover:bg-purple-100">
-            <Play className="h-4 w-4" />
-          </Button>
-        </div>
-      );
-    } else {
-      // normal/reviewed状态：普通播放按钮
-      return (
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="opacity-0 transition-opacity group-hover:opacity-100"
-          >
-            <Play className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="opacity-0 transition-opacity group-hover:opacity-100"
-          >
-            <PencilLine className="h-4 w-4" />
-          </Button>
-        </div>
-      );
+  // 渲染播放按钮组 - 拆分复杂的渲染逻辑
+  const renderPlayButtons = useCallback(() => {
+    switch (textItem.status) {
+      case 'pending':
+        return (
+          <div className="flex items-center gap-1">
+            <PlayButton
+              value={textItem.originValue}
+              className={BUTTON_STYLES.playOriginal}
+              onClick={() => handlePlay(textItem.originValue)}
+            />
+            <PlayButton
+              value={textItem.updateValue}
+              className={BUTTON_STYLES.playUpdate}
+              onClick={() => handlePlay(textItem.updateValue)}
+            />
+          </div>
+        );
+      case 'normal':
+      case 'reviewed':
+        return (
+          <div className="flex items-center gap-1">
+            <PlayButton
+              value={currentValue}
+              className={BUTTON_STYLES.playDefault}
+              onClick={() => handlePlay(currentValue)}
+            />
+            <EditButton className={BUTTON_STYLES.playDefault} />
+          </div>
+        );
+      default:
+        return null;
     }
-  };
+  }, [textItem.status, textItem.originValue, textItem.updateValue, currentValue, handlePlay]);
 
-  // 渲染审核按钮（仅pending状态）
-  const renderReviewButtons = () => {
-    if (textItem.status === 'pending') {
-      return (
-        <div className="flex justify-end gap-2 border-t border-red-200 p-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-4 text-green-600 hover:bg-green-100"
-            onClick={handleApprove}
-          >
-            <Check className="mr-1 h-3 w-3" />
-            同意
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-4 text-red-600 hover:bg-red-100"
-            onClick={handleReject}
-          >
-            <X className="mr-1 h-3 w-3" />
-            拒绝
-          </Button>
-        </div>
-      );
-    }
-    return null;
-  };
+  // 渲染审核按钮组
+  const renderActionButtons = useCallback(() => {
+    if (textItem.status !== 'pending') return null;
+
+    return (
+      <div className="flex justify-end gap-2 border-t border-red-200 p-2">
+        <ActionButton type="approve" onClick={handleApprove} />
+        <ActionButton type="reject" onClick={handleReject} />
+      </div>
+    );
+  }, [textItem.status, handleApprove, handleReject]);
 
   return (
-    <div className={`group rounded-xl ${getBackgroundColor()} ${getBorderStyle()}`}>
+    <div className={CONTAINER_STYLES.base}>
       {/* 主内容区域 */}
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-3">
@@ -175,17 +198,9 @@ export function TextItem({ textItem, index, parentStatus, onApprove, onReject }:
 
           {/* 文本内容 */}
           <div className="flex flex-col gap-1">
-            <div className="font-medium">{getDisplayText()}</div>
-            <div className="text-xs text-gray-500">{getVersionLabel()}</div>
+            <div className="font-medium">{currentValue.name}</div>
+            <div className="text-xs text-gray-500">{versionLabel}</div>
           </div>
-
-          {/* 状态标识 */}
-          {/* {textItem.status === 'reviewed' && (
-            <div className="flex items-center gap-1 text-green-600">
-              <Check className="h-4 w-4" />
-              <span className="text-xs">已审核</span>
-            </div>
-          )} */}
         </div>
 
         {/* 右侧操作按钮 */}
@@ -193,7 +208,7 @@ export function TextItem({ textItem, index, parentStatus, onApprove, onReject }:
       </div>
 
       {/* 底部审核按钮（仅pending状态显示） */}
-      {renderReviewButtons()}
+      {renderActionButtons()}
     </div>
   );
-}
+};

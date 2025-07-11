@@ -1,10 +1,12 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ChevronsDown, ChevronsUp, Play } from 'lucide-react';
 import { ViewTwoSfxItemFormat } from '@/lib/interface/viewInterface';
 import { SfxItem } from './SfxItem';
+import { useAudioPlayerStore } from '@/lib/store/useAudioPlayerStore';
+import { getPlayValueAllByStatus, getValueByStatus } from './utils';
 
 interface StoryTwoSfxItemProps {
   sfxItem: ViewTwoSfxItemFormat;
@@ -14,24 +16,55 @@ interface StoryTwoSfxItemProps {
   onSfxReject?: (sfxIndex: number, valueIndex: number) => void;
 }
 
-export function StoryTwoSfxItem({
+export const StoryTwoSfxItem: React.FC<StoryTwoSfxItemProps> = ({
   sfxItem,
   index,
   parentStatus,
   onSfxApprove,
   onSfxReject,
-}: StoryTwoSfxItemProps) {
+}) => {
   const [isOpen, setIsOpen] = useState(false);
+  const { playSequential } = useAudioPlayerStore();
 
-  // 处理音效子项的审核同意
-  const handleSfxApprove = (valueIndex: number) => {
-    onSfxApprove?.(index, valueIndex);
-  };
+  // 处理音效子项的审核同意 - 使用 useCallback 优化
+  const handleSfxApprove = useCallback(
+    (valueIndex: number) => {
+      onSfxApprove?.(index, valueIndex);
+    },
+    [onSfxApprove, index]
+  );
 
-  // 处理音效子项的审核拒绝
-  const handleSfxReject = (valueIndex: number) => {
-    onSfxReject?.(index, valueIndex);
-  };
+  // 处理音效子项的审核拒绝 - 使用 useCallback 优化
+  const handleSfxReject = useCallback(
+    (valueIndex: number) => {
+      onSfxReject?.(index, valueIndex);
+    },
+    [onSfxReject, index]
+  );
+
+  // 处理播放全部音效 - 使用工具函数简化音频源选择
+  const handlePlayAll = useCallback(() => {
+    if (sfxItem.valuesList.length === 0) return;
+
+    const playValueAll = getPlayValueAllByStatus(sfxItem.valuesList);
+
+    const playlist = playValueAll
+      .map((value, valueIndex) => {
+        return {
+          src: value.url,
+          title: value.name,
+          type: 'sfx' as const,
+          itemIndex: index,
+          valueIndex: valueIndex,
+        };
+      })
+      .filter((item) => item.src);
+
+    if (playlist.length > 0) {
+      console.log('开始序列播放音效:', playlist);
+      playSequential(playlist);
+    }
+  }, [sfxItem, parentStatus, index, playSequential]);
 
   return (
     <div className="flex items-center justify-between rounded-xl bg-white px-4 py-2">
@@ -51,25 +84,16 @@ export function StoryTwoSfxItem({
                 {isOpen ? '' : ' - 点击展开'}
               </div>
             </div>
-
-            {/* 状态汇总 */}
-            {/* <div className="flex items-center gap-1">
-              {sfxItem.valuesList.some((v) => v.status === 'pending') && (
-                <span className="rounded bg-yellow-100 px-2 py-1 text-xs text-yellow-700">
-                  {sfxItem.valuesList.filter((v) => v.status === 'pending').length} 待审核
-                </span>
-              )}
-              {sfxItem.valuesList.some((v) => v.status === 'reviewed') && (
-                <span className="rounded bg-green-100 px-2 py-1 text-xs text-green-700">
-                  {sfxItem.valuesList.filter((v) => v.status === 'reviewed').length} 已审核
-                </span>
-              )}
-            </div> */}
           </div>
 
           <div className="flex items-center gap-1">
             {/* 播放全部按钮 */}
-            <Button variant="ghost" size="icon">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handlePlayAll}
+              title={`按顺序播放所有 ${sfxItem.valuesList.length} 个音效`}
+            >
               <Play className="h-4 w-4" />
             </Button>
 
@@ -99,4 +123,4 @@ export function StoryTwoSfxItem({
       </Collapsible>
     </div>
   );
-}
+};
