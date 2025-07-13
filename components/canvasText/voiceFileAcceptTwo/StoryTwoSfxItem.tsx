@@ -7,6 +7,7 @@ import { ViewTwoSfxItemFormat } from '@/lib/interface/viewInterface';
 import { SfxItem } from './SfxItem';
 import { useAudioPlayerStore } from '@/lib/store/useAudioPlayerStore';
 import { getPlayValueAllByStatus, getValueByStatus } from './utils';
+import { Badge } from '@/components/ui/badge';
 
 interface StoryTwoSfxItemProps {
   sfxItem: ViewTwoSfxItemFormat;
@@ -78,7 +79,17 @@ export const StoryTwoSfxItem: React.FC<StoryTwoSfxItemProps> = ({
 
             {/* 音效标题 */}
             <div className="flex flex-col gap-1">
-              <div className="font-medium">{sfxItem.title}</div>
+              {/* <div className="font-medium">{sfxItem.title}</div> */}
+              <div className="flex flex-wrap gap-2">
+                {sfxItem.title.map((item, index) => (
+                  <Badge
+                    className={`group relative h-7 bg-[#3c6e71] text-sm`}
+                    key={`${item}-${index}`}
+                  >
+                    {item}
+                  </Badge>
+                ))}
+              </div>
               <div className="text-xs text-gray-500">
                 {sfxItem.valuesList.length} 个音效项
                 {isOpen ? '' : ' - 点击展开'}

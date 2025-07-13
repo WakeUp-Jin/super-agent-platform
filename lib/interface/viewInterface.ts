@@ -115,7 +115,7 @@ export interface ViewTwoTextItemFormat {
 
 export interface ViewTwoSfxItemFormat {
   type: 'sfx';
-  title: string;
+  title: string[];
   valuesList: ViewTwoSfxValueItemFormat[];
 }
 

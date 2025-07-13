@@ -11,6 +11,7 @@ import { getView, updateView } from '@/lib/api/view';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { motion, AnimatePresence } from 'motion/react';
 import { PlayerAudio } from '@/components/common/PlayerAudio';
+import { Button } from '@/components/ui/button';
 
 export function VoiceFileAccept() {
   const [storyData, setStoryData] = useState<ViewBoardStoryTwoInterface[]>([]);
@@ -168,11 +169,11 @@ export function VoiceFileAccept() {
     <div className="flex h-full w-full flex-col gap-4 overflow-hidden p-1">
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full w-full pr-3">
-          <div
-            className="cursor-pointer text-lg font-bold text-gray-800 transition-colors duration-200 hover:text-blue-600"
-            onClick={toggleBottomPanel}
-          >
-            声音文件审核
+          <div className="mb-2 flex items-center justify-between">
+            <h2 className="text-lg font-bold text-gray-800">声音文件审核</h2>
+            <Button variant="outline" size="sm" onClick={toggleBottomPanel}>
+              {isBottomPanelVisible ? '收起播放栏' : '展开播放栏'}
+            </Button>
           </div>
           <div className="flex flex-col gap-3">
             {storyData.map((story, index) => (
