@@ -12,23 +12,32 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { motion, AnimatePresence } from 'motion/react';
 import { PlayerAudio } from '@/components/common/PlayerAudio';
 import { Button } from '@/components/ui/button';
+import { SkeletonLoader } from '@/components/common/SkeletonLoader';
 
 export function VoiceFileAccept() {
   const [storyData, setStoryData] = useState<ViewBoardStoryTwoInterface[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const { boardTwo, setBoardTwo, updateBoardTwo, clearBoardTwo } = useViewBoardTwoStore();
   const { isBottomPanelVisible, toggleBottomPanel } = useAudioPlayerStore();
 
   useEffect(() => {
     const fetchData = async () => {
-      const data = await getView({
-        userId: '123',
-        sessionId: '456',
-        viewStep: '2',
-      });
-      console.log(data);
+      try {
+        setIsLoading(true);
+        const data = await getView({
+          userId: '123',
+          sessionId: '456',
+          viewStep: '2',
+        });
+        console.log(data);
 
-      setBoardTwo({ storyData: data, title: '' });
+        setBoardTwo({ storyData: data, title: '' });
+      } catch (error) {
+        console.error('获取数据失败:', error);
+      } finally {
+        setIsLoading(false);
+      }
     };
     fetchData();
   }, [setBoardTwo]);
@@ -175,21 +184,26 @@ export function VoiceFileAccept() {
               {isBottomPanelVisible ? '收起播放栏' : '展开播放栏'}
             </Button>
           </div>
-          <div className="flex flex-col gap-3">
-            {storyData.map((story, index) => (
-              <StoryTwoContainer
-                key={index}
-                storyItem={story}
-                index={index}
-                onStoryApprove={handleStoryApprove}
-                onStoryReject={handleStoryReject}
-                onTextApprove={handleTextApprove}
-                onTextReject={handleTextReject}
-                onSfxApprove={handleSfxApprove}
-                onSfxReject={handleSfxReject}
-              />
-            ))}
-          </div>
+
+          {isLoading ? (
+            <SkeletonLoader />
+          ) : (
+            <div className="flex flex-col gap-3">
+              {storyData.map((story, index) => (
+                <StoryTwoContainer
+                  key={index}
+                  storyItem={story}
+                  index={index}
+                  onStoryApprove={handleStoryApprove}
+                  onStoryReject={handleStoryReject}
+                  onTextApprove={handleTextApprove}
+                  onTextReject={handleTextReject}
+                  onSfxApprove={handleSfxApprove}
+                  onSfxReject={handleSfxReject}
+                />
+              ))}
+            </div>
+          )}
         </ScrollArea>
       </div>
       <AnimatePresence>
