@@ -167,16 +167,20 @@ export const StoryTwoContainer: React.FC<StoryTwoContainerProps> = ({
       case 'pending':
         return (
           <div className="flex items-center gap-2">
-            <PlayButton
-              value={storyItem.originValue}
-              className={BUTTON_STYLES.playOriginal}
-              onClick={() => handlePlay(storyItem.originValue)}
-            />
-            <PlayButton
-              value={storyItem.updateValue}
-              className={BUTTON_STYLES.playUpdate}
-              onClick={() => handlePlay(storyItem.updateValue)}
-            />
+            {storyItem.originValue.url && (
+              <PlayButton
+                value={storyItem.originValue}
+                className={BUTTON_STYLES.playOriginal}
+                onClick={() => handlePlay(storyItem.originValue)}
+              />
+            )}
+            {storyItem.updateValue.url && (
+              <PlayButton
+                value={storyItem.updateValue}
+                className={BUTTON_STYLES.playUpdate}
+                onClick={() => handlePlay(storyItem.updateValue)}
+              />
+            )}
           </div>
         );
       case 'normal':

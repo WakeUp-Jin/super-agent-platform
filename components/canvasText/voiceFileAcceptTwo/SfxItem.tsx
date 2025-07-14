@@ -37,15 +37,17 @@ interface PlayButtonProps {
   value: ViewTwoValueItemFormat;
   className?: string;
   onClick: () => void;
+  disabled?: boolean;
 }
 
-const PlayButton: React.FC<PlayButtonProps> = ({ value, className, onClick }) => (
+const PlayButton: React.FC<PlayButtonProps> = ({ value, className, onClick, disabled }) => (
   <Button
     variant="ghost"
     size="icon"
     className={className}
     onClick={onClick}
     title={`播放: ${value.name}`}
+    disabled={disabled}
   >
     <Play className="h-3 w-3" />
   </Button>
@@ -145,27 +147,34 @@ export const SfxItem: React.FC<SfxItemProps> = ({
       case 'pending':
         return (
           <div className="flex items-center gap-1">
-            <PlayButton
-              value={valueItem.originValue}
-              className={BUTTON_STYLES.playOriginal}
-              onClick={() => handlePlay(valueItem.originValue)}
-            />
-            <PlayButton
-              value={valueItem.updateValue}
-              className={BUTTON_STYLES.playUpdate}
-              onClick={() => handlePlay(valueItem.updateValue)}
-            />
+            {valueItem.originValue.url && (
+              <PlayButton
+                value={valueItem.originValue}
+                className={BUTTON_STYLES.playOriginal}
+                onClick={() => handlePlay(valueItem.originValue)}
+                disabled={!valueItem.originValue.url}
+              />
+            )}
+            {valueItem.updateValue.url && (
+              <PlayButton
+                value={valueItem.updateValue}
+                className={BUTTON_STYLES.playUpdate}
+                onClick={() => handlePlay(valueItem.updateValue)}
+              />
+            )}
           </div>
         );
       case 'normal':
       case 'reviewed':
         return (
           <div className="flex items-center gap-1">
-            <PlayButton
-              value={currentValue}
-              className={BUTTON_STYLES.playDefault}
-              onClick={() => handlePlay(currentValue)}
-            />
+            {currentValue.url && (
+              <PlayButton
+                value={currentValue}
+                className={BUTTON_STYLES.playDefault}
+                onClick={() => handlePlay(currentValue)}
+              />
+            )}
             <EditButton className={BUTTON_STYLES.playDefault} />
           </div>
         );

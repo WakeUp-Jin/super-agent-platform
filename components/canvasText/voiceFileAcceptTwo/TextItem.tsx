@@ -145,27 +145,33 @@ export const TextItem: React.FC<TextItemProps> = ({
       case 'pending':
         return (
           <div className="flex items-center gap-1">
-            <PlayButton
-              value={textItem.originValue}
-              className={BUTTON_STYLES.playOriginal}
-              onClick={() => handlePlay(textItem.originValue)}
-            />
-            <PlayButton
-              value={textItem.updateValue}
-              className={BUTTON_STYLES.playUpdate}
-              onClick={() => handlePlay(textItem.updateValue)}
-            />
+            {textItem.originValue.url && (
+              <PlayButton
+                value={textItem.originValue}
+                className={BUTTON_STYLES.playOriginal}
+                onClick={() => handlePlay(textItem.originValue)}
+              />
+            )}
+            {textItem.updateValue.url && (
+              <PlayButton
+                value={textItem.updateValue}
+                className={BUTTON_STYLES.playUpdate}
+                onClick={() => handlePlay(textItem.updateValue)}
+              />
+            )}
           </div>
         );
       case 'normal':
       case 'reviewed':
         return (
           <div className="flex items-center gap-1">
-            <PlayButton
-              value={currentValue}
-              className={BUTTON_STYLES.playDefault}
-              onClick={() => handlePlay(currentValue)}
-            />
+            {currentValue.url && (
+              <PlayButton
+                value={currentValue}
+                className={BUTTON_STYLES.playDefault}
+                onClick={() => handlePlay(currentValue)}
+              />
+            )}
             <EditButton className={BUTTON_STYLES.playDefault} />
           </div>
         );
