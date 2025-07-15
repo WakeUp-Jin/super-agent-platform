@@ -1,4 +1,8 @@
-import { ViewTwoSfxValueItemFormat, ViewTwoValueItemFormat } from '@/lib/interface/viewInterface';
+import {
+  ViewTwoSfxValueItemFormat,
+  ViewTwoValueItemFormat,
+  ViewBoardStoryTwoInterface,
+} from '@/lib/interface/viewInterface';
 
 /**
  * 根据状态获取对应的值
@@ -52,4 +56,46 @@ export function getPlayValueAllByStatus(valuesList: ViewTwoSfxValueItemFormat[])
   });
 
   return voiceResult;
+}
+
+/**
+ * 递归的方案解决嵌套层级的值判断
+ * @param currentBoardData
+ */
+export function allStatusNotPending(currentBoardData: any) {
+  //背景BGM
+  if (currentBoardData.status === 'pending') return false;
+
+  //如果有子数组的话- 干音
+  if (Array.isArray(currentBoardData.items)) {
+    return currentBoardData.items.every((item: any) => allStatusNotPending(item));
+  }
+
+  //如果还有子数组的话- 音效
+  if (Array.isArray(currentBoardData.valuesList)) {
+    return currentBoardData.valuesList.every((item: any) => allStatusNotPending(item));
+  }
+
+  return true;
+}
+
+/**
+ * 递归的方案解决嵌套层级的值判断
+ * @param currentBoardData
+ */
+export function allStatusIsNormal(currentBoardData: any) {
+  //背景BGM
+  if (currentBoardData.status !== 'normal') return false;
+
+  //如果有子数组的话- 干音
+  if (Array.isArray(currentBoardData.items)) {
+    return currentBoardData.items.every((item: any) => allStatusNotPending(item));
+  }
+
+  //如果还有子数组的话- 音效
+  if (Array.isArray(currentBoardData.valuesList)) {
+    return currentBoardData.valuesList.every((item: any) => allStatusNotPending(item));
+  }
+
+  return true;
 }

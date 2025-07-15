@@ -1,9 +1,19 @@
 'use client';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { PencilLine, Play, Check, X } from 'lucide-react';
+import { PencilLine, Play, Check, X, Upload } from 'lucide-react';
 import { ViewTwoTextItemFormat, ViewTwoValueItemFormat } from '@/lib/interface/viewInterface';
 import { useAudioPlayerStore } from '@/lib/store/useAudioPlayerStore';
+import { useStoreVoiceUpload } from '@/lib/store/useVoiceFileStore';
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 // 常量定义
 const CONTAINER_STYLES = {
@@ -27,6 +37,7 @@ const VERSION_LABELS = {
 interface TextItemProps {
   textItem: ViewTwoTextItemFormat;
   index: number;
+  storyIndex: number;
   parentStatus: 'normal' | 'pending' | 'reviewed';
   onApprove?: (itemIndex: number) => void;
   onReject?: (itemIndex: number) => void;
@@ -37,13 +48,19 @@ interface PlayButtonProps {
   value: ViewTwoValueItemFormat;
   className?: string;
   onClick: () => void;
+  forceShow?: boolean;
 }
 
-const PlayButton: React.FC<PlayButtonProps> = ({ value, className, onClick }) => (
+const PlayButton: React.FC<PlayButtonProps> = ({
+  value,
+  className = '',
+  onClick,
+  forceShow = false,
+}) => (
   <Button
     variant="ghost"
     size="icon"
-    className={className}
+    className={getButtonClassName(className, forceShow)}
     onClick={onClick}
     title={`播放: ${value.name}`}
   >
@@ -51,9 +68,24 @@ const PlayButton: React.FC<PlayButtonProps> = ({ value, className, onClick }) =>
   </Button>
 );
 
+// 通用按钮样式计算函数
+const getButtonClassName = (baseClassName: string, forceShow: boolean): string => {
+  return forceShow ? baseClassName.replace('opacity-0', 'opacity-100') : baseClassName;
+};
+
 // 编辑按钮组件
-const EditButton: React.FC<{ className?: string }> = ({ className }) => (
-  <Button variant="ghost" size="icon" className={className} title="编辑">
+interface EditButtonProps {
+  className?: string;
+  forceShow?: boolean;
+}
+
+const EditButton: React.FC<EditButtonProps> = ({ className = '', forceShow = false }) => (
+  <Button
+    variant="ghost"
+    size="icon"
+    className={getButtonClassName(className, forceShow)}
+    title="编辑"
+  >
     <PencilLine className="h-4 w-4" />
   </Button>
 );
@@ -88,11 +120,25 @@ const ActionButton: React.FC<ActionButtonProps> = ({ type, onClick }) => (
 export const TextItem: React.FC<TextItemProps> = ({
   textItem,
   index,
+  storyIndex,
   parentStatus,
   onApprove,
   onReject,
 }) => {
   const { playAudio } = useAudioPlayerStore();
+  const [forceShowButtons, setForceShowButtons] = useState(false);
+
+  // 使用store来处理文本文件上传，现在包含完整的上传功能
+  const { isUploading, error, openFileDialog } = useStoreVoiceUpload({
+    type: 'text',
+    storyIndex,
+    itemIndex: index,
+    valueIndex: 0,
+    storyBoardIndex: textItem.storyBoardAudioScriptId,
+    storyBoardIndexType: 'audioPeople',
+    userId: '123',
+    sessionId: '456',
+  });
 
   // 计算当前显示的值 - 使用 useMemo 优化
   const currentValue = useMemo((): ViewTwoValueItemFormat => {
@@ -170,15 +216,41 @@ export const TextItem: React.FC<TextItemProps> = ({
                 value={currentValue}
                 className={BUTTON_STYLES.playDefault}
                 onClick={() => handlePlay(currentValue)}
+                forceShow={forceShowButtons}
               />
             )}
-            <EditButton className={BUTTON_STYLES.playDefault} />
+            <DropdownMenu onOpenChange={setForceShowButtons}>
+              <DropdownMenuTrigger>
+                <EditButton className={BUTTON_STYLES.playDefault} forceShow={forceShowButtons} />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem
+                  onClick={openFileDialog}
+                  disabled={isUploading}
+                  className="cursor-pointer"
+                >
+                  <Upload className="mr-2 h-4 w-4" />
+                  {isUploading ? '上传中...' : '上传音频'}
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <PencilLine className="mr-2 h-4 w-4" />
+                  编辑文本
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         );
       default:
         return null;
     }
-  }, [textItem.status, textItem.originValue, textItem.updateValue, currentValue, handlePlay]);
+  }, [
+    textItem.status,
+    textItem.originValue,
+    textItem.updateValue,
+    currentValue,
+    handlePlay,
+    forceShowButtons,
+  ]);
 
   // 渲染审核按钮组
   const renderActionButtons = useCallback(() => {

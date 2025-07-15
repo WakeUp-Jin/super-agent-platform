@@ -17,7 +17,7 @@ export const mockViewBoardStoryTwoData: ViewBoardStoryTwoInterface[] = [
       },
       {
         type: 'sfx',
-        title: '场景音效：雨夜',
+        title: ['场景音效：雨夜'],
         valuesList: [
           {
             originValue: { name: '雷声-原始', url: '/audio/thunder_origin.mp3' },

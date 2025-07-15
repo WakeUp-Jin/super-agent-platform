@@ -13,6 +13,9 @@ import { motion, AnimatePresence } from 'motion/react';
 import { PlayerAudio } from '@/components/common/PlayerAudio';
 import { Button } from '@/components/ui/button';
 import { SkeletonLoader } from '@/components/common/SkeletonLoader';
+import { allStatusIsNormal, allStatusNotPending } from './utils';
+import { createBoardStoryDiff } from '@/lib/api/view';
+import { useVoiceFileStore } from '@/lib/store/useVoiceFileStore';
 
 export function VoiceFileAccept() {
   const [storyData, setStoryData] = useState<ViewBoardStoryTwoInterface[]>([]);
@@ -20,6 +23,7 @@ export function VoiceFileAccept() {
 
   const { boardTwo, setBoardTwo, updateBoardTwo, clearBoardTwo } = useViewBoardTwoStore();
   const { isBottomPanelVisible, toggleBottomPanel } = useAudioPlayerStore();
+  const { setStoryDataUpdater } = useVoiceFileStore();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -42,9 +46,47 @@ export function VoiceFileAccept() {
     fetchData();
   }, [setBoardTwo]);
 
+  //监听store的全局状态boardTwo的变化
   useEffect(() => {
     setStoryData(boardTwo?.storyData ?? []);
   }, [boardTwo]);
+
+  // 设置Zustand store的数据更新函数
+  useEffect(() => {
+    setStoryDataUpdater(setStoryData);
+    // 组件卸载时清理
+    return () => setStoryDataUpdater(null);
+  }, [setStoryDataUpdater]);
+
+  //监听storyData的变化，发起创建画本的请求
+  useEffect(() => {
+    if (storyData.length > 0) {
+      checkAllReviewCompletedTwo(storyData);
+    }
+  }, [storyData]);
+
+  const checkAllReviewCompletedTwo = (currentBoardData: ViewBoardStoryTwoInterface[]) => {
+    const allBgmNotPending = currentBoardData.every((item) => allStatusNotPending(item));
+    console.log('🚀 ~ checkAllReviewCompletedTwo ~ allBgmNotPending:', allBgmNotPending);
+
+    const allBgmIsNormal = currentBoardData.every((item) => allStatusIsNormal(item));
+    console.log('🚀 ~ checkAllReviewCompletedTwo ~ allBgmIsNormal:', allBgmIsNormal);
+
+    if (allBgmNotPending && !allBgmIsNormal) {
+      console.log('所有审核已完成，准备发起修改画本请求');
+      createBoardStoryDiff({
+        sessionId: '456',
+        userId: '123',
+        viewStep: '2',
+      })
+        .then((res) => {
+          console.log('更新后端画本数据成功', res);
+        })
+        .catch((err) => {
+          console.log('更新后端画本数据失败', err);
+        });
+    }
+  };
 
   // 通用的 API 调用函数
   const callUpdateViewAPI = async (filePath: string[] | string, approved: boolean) => {
@@ -63,7 +105,7 @@ export function VoiceFileAccept() {
     }
   };
 
-  // 处理故事级别的审核同意
+  // 处理背景BGM级别的审核同意
   const handleStoryApprove = (storyIndex: number) => {
     const findItem = storyData[storyIndex];
 
@@ -76,7 +118,7 @@ export function VoiceFileAccept() {
     callUpdateViewAPI(findItem?.bgmFilePath ?? [], true);
   };
 
-  // 处理故事级别的审核拒绝
+  // 处理背景BGM级别的审核拒绝
   const handleStoryReject = (storyIndex: number) => {
     const findItem = storyData[storyIndex];
 

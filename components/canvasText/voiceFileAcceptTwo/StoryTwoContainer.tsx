@@ -1,11 +1,19 @@
 'use client';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Play, Check, X } from 'lucide-react';
+import { Play, Check, X, PencilLine, Upload } from 'lucide-react';
 import { ViewBoardStoryTwoInterface, ViewTwoValueItemFormat } from '@/lib/interface/viewInterface';
 import { StoryTwoTextItem } from './StoryTwoTextItem';
 import { StoryTwoSfxItem } from './StoryTwoSfxItem';
 import { useAudioPlayerStore } from '@/lib/store/useAudioPlayerStore';
+import { useStoreVoiceUpload } from '@/lib/store/useVoiceFileStore';
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 // 常量定义
 const CONTAINER_STYLES = {
@@ -38,22 +46,50 @@ interface StoryTwoContainerProps {
   onSfxReject?: (storyIndex: number, sfxIndex: number, valueIndex: number) => void;
 }
 
+// 通用按钮样式计算函数
+const getButtonClassName = (baseClassName: string, forceShow: boolean): string => {
+  return forceShow ? baseClassName.replace('opacity-0', 'opacity-100') : baseClassName;
+};
+
 // 播放按钮组件
 interface PlayButtonProps {
   value: ViewTwoValueItemFormat;
   className?: string;
   onClick: () => void;
+  forceShow?: boolean;
 }
 
-const PlayButton: React.FC<PlayButtonProps> = ({ value, className, onClick }) => (
+const PlayButton: React.FC<PlayButtonProps> = ({
+  value,
+  className = '',
+  onClick,
+  forceShow = false,
+}) => (
   <Button
     variant="ghost"
     size="sm"
-    className={className}
+    className={forceShow ? getButtonClassName(className, forceShow) : className}
     onClick={onClick}
     title={`播放: ${value.name}`}
   >
     <Play className="h-3 w-3" />
+  </Button>
+);
+
+// 编辑按钮组件
+interface EditButtonProps {
+  className?: string;
+  forceShow?: boolean;
+}
+
+const EditButton: React.FC<EditButtonProps> = ({ className = '', forceShow = false }) => (
+  <Button
+    variant="ghost"
+    size="sm"
+    className={forceShow ? getButtonClassName(className, forceShow) : className}
+    title="编辑"
+  >
+    <PencilLine className="h-3 w-3" />
   </Button>
 );
 
@@ -95,6 +131,17 @@ export const StoryTwoContainer: React.FC<StoryTwoContainerProps> = ({
   onSfxReject,
 }) => {
   const { playAudio } = useAudioPlayerStore();
+  const [forceShowButtons, setForceShowButtons] = useState(false);
+
+  // 使用store来处理故事级别的文件上传，现在包含完整的上传功能
+  const { isUploading, error, openFileDialog } = useStoreVoiceUpload({
+    storyIndex: index,
+    type: 'story',
+    storyBoardIndex: storyItem.storyBoardBgmId,
+    storyBoardIndexType: 'bgm',
+    userId: '123',
+    sessionId: '456',
+  });
 
   // 样式计算 - 使用 useMemo 优化
   const containerStyle = useMemo(() => {
@@ -185,11 +232,33 @@ export const StoryTwoContainer: React.FC<StoryTwoContainerProps> = ({
         );
       case 'normal':
         return (
-          <PlayButton
-            value={storyItem.originValue}
-            className={BUTTON_STYLES.playDefault}
-            onClick={() => handlePlay(storyItem.originValue)}
-          />
+          <div className="flex items-center gap-2">
+            <PlayButton
+              value={storyItem.originValue}
+              className={BUTTON_STYLES.playDefault}
+              onClick={() => handlePlay(storyItem.originValue)}
+              forceShow={forceShowButtons}
+            />
+            <DropdownMenu onOpenChange={setForceShowButtons}>
+              <DropdownMenuTrigger>
+                <EditButton className={BUTTON_STYLES.playDefault} forceShow={forceShowButtons} />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem
+                  onClick={openFileDialog}
+                  disabled={isUploading}
+                  className="cursor-pointer"
+                >
+                  <Upload className="mr-2 h-3 w-3" />
+                  {isUploading ? '上传中...' : '上传音频'}
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <PencilLine className="mr-2 h-3 w-3" />
+                  编辑故事
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         );
       default:
         const selectedValue =
@@ -197,14 +266,36 @@ export const StoryTwoContainer: React.FC<StoryTwoContainerProps> = ({
             ? storyItem.originValue
             : storyItem.updateValue;
         return (
-          <PlayButton
-            value={selectedValue}
-            className={BUTTON_STYLES.playDefault}
-            onClick={() => handlePlay(selectedValue)}
-          />
+          <div className="flex items-center gap-2">
+            <PlayButton
+              value={selectedValue}
+              className={BUTTON_STYLES.playDefault}
+              onClick={() => handlePlay(selectedValue)}
+              forceShow={forceShowButtons}
+            />
+            <DropdownMenu onOpenChange={setForceShowButtons}>
+              <DropdownMenuTrigger>
+                <EditButton className={BUTTON_STYLES.playDefault} forceShow={forceShowButtons} />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem
+                  onClick={openFileDialog}
+                  disabled={isUploading}
+                  className="cursor-pointer"
+                >
+                  <Upload className="mr-2 h-3 w-3" />
+                  {isUploading ? '上传中...' : '上传音频'}
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <PencilLine className="mr-2 h-3 w-3" />
+                  编辑故事
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         );
     }
-  }, [storyItem, handlePlay]);
+  }, [storyItem, handlePlay, forceShowButtons]);
 
   // 渲染审核按钮组
   const renderActionButtons = useCallback(() => {
@@ -232,6 +323,7 @@ export const StoryTwoContainer: React.FC<StoryTwoContainerProps> = ({
             key={key}
             textItem={item}
             index={itemIndex}
+            storyIndex={index}
             parentStatus={storyItem.status}
             onApprove={handleTextApprove}
             onReject={handleTextReject}
@@ -243,6 +335,7 @@ export const StoryTwoContainer: React.FC<StoryTwoContainerProps> = ({
             key={key}
             sfxItem={item}
             index={itemIndex}
+            storyIndex={index}
             parentStatus={storyItem.status}
             onSfxApprove={handleSfxApprove}
             onSfxReject={handleSfxReject}

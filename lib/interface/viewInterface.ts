@@ -18,6 +18,7 @@ export interface UpdateViewRequestInterface {
 export interface CreateBoardStoryDiffRequestInterface {
   sessionId: string;
   userId: string;
+  viewStep?: string;
 }
 
 //视图画本的结构-第一步
@@ -94,6 +95,8 @@ export interface ViewBoardStoryTwoInterface {
   originValue: ViewTwoValueItemFormat;
   updateValue: ViewTwoValueItemFormat;
   bgmFilePath?: string[];
+  storyBoardBgmId?: string; //故事板中的bgmId
+
   peopleSelectValue: 'originValue' | 'updateValue' | '';
   items: (ViewTwoTextItemFormat | ViewTwoSfxItemFormat)[];
 }
@@ -110,18 +113,24 @@ export interface ViewTwoTextItemFormat {
   originValue: ViewTwoValueItemFormat;
   updateValue: ViewTwoValueItemFormat;
   audioFilePath?: string;
+  storyBoardAudioScriptId?: string; //故事板中的音频脚本id
+
   peopleSelectValue: 'originValue' | 'updateValue' | '';
 }
 
 export interface ViewTwoSfxItemFormat {
   type: 'sfx';
   title: string[];
+  storyBoardAudioScriptId?: string; //故事板中的音频脚本id
+
   valuesList: ViewTwoSfxValueItemFormat[];
 }
 
 export interface ViewTwoSfxValueItemFormat {
   originValue: ViewTwoValueItemFormat;
   updateValue: ViewTwoValueItemFormat;
+  storyBoardSfxFileUrlId?: string; //故事板中audio的音频脚本id
+
   peopleSelectValue: 'originValue' | 'updateValue' | '';
   status: 'normal' | 'pending' | 'reviewed';
   sfxFilePath?: string[];

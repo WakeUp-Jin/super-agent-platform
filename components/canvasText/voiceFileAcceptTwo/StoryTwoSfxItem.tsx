@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 interface StoryTwoSfxItemProps {
   sfxItem: ViewTwoSfxItemFormat;
   index: number;
+  storyIndex: number;
   parentStatus: 'normal' | 'pending' | 'reviewed';
   onSfxApprove?: (sfxIndex: number, valueIndex: number) => void;
   onSfxReject?: (sfxIndex: number, valueIndex: number) => void;
@@ -20,6 +21,7 @@ interface StoryTwoSfxItemProps {
 export const StoryTwoSfxItem: React.FC<StoryTwoSfxItemProps> = ({
   sfxItem,
   index,
+  storyIndex,
   parentStatus,
   onSfxApprove,
   onSfxReject,
@@ -124,6 +126,8 @@ export const StoryTwoSfxItem: React.FC<StoryTwoSfxItemProps> = ({
                 key={valueIndex}
                 valueItem={valueItem}
                 index={valueIndex}
+                storyIndex={storyIndex}
+                sfxIndex={index}
                 parentStatus={parentStatus}
                 onApprove={handleSfxApprove}
                 onReject={handleSfxReject}
