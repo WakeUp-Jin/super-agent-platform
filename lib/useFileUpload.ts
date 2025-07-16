@@ -44,9 +44,9 @@ export function useFileUpload(options: UseFileUploadOptions = {}): UseFileUpload
 
       if (!file) return;
 
-      setIsUploading(true);
       setError(null);
       setUploadProgress(0);
+      setIsUploading(true);
 
       try {
         // 模拟上传进度

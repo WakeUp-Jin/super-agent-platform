@@ -1,7 +1,7 @@
 'use client';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { PencilLine, Play, Check, X, Upload } from 'lucide-react';
+import { PencilLine, Play, Check, X, Upload, LoaderCircle } from 'lucide-react';
 import { ViewTwoSfxValueItemFormat, ViewTwoValueItemFormat } from '@/lib/interface/viewInterface';
 import { useAudioPlayerStore } from '@/lib/store/useAudioPlayerStore';
 import { useStoreVoiceUpload } from '@/lib/store/useVoiceFileStore';
@@ -215,13 +215,18 @@ export const SfxItem: React.FC<SfxItemProps> = ({
       case 'reviewed':
         return (
           <div className="flex items-center gap-1">
-            {currentValue.url && (
-              <PlayButton
-                value={currentValue}
-                className={BUTTON_STYLES.playDefault}
-                onClick={() => handlePlay(currentValue)}
-                forceShow={forceShowButtons}
-              />
+            {/* 上传状态：显示加载器，隐藏播放按钮 */}
+            {isUploading ? (
+              <LoaderCircle className="h-3 w-3 animate-spin" />
+            ) : (
+              currentValue.url && (
+                <PlayButton
+                  value={currentValue}
+                  className={BUTTON_STYLES.playDefault}
+                  onClick={() => handlePlay(currentValue)}
+                  forceShow={forceShowButtons}
+                />
+              )
             )}
             <DropdownMenu onOpenChange={setForceShowButtons}>
               <DropdownMenuTrigger>
@@ -254,6 +259,8 @@ export const SfxItem: React.FC<SfxItemProps> = ({
     currentValue,
     handlePlay,
     forceShowButtons,
+    isUploading,
+    openFileDialog,
   ]);
 
   // 渲染审核按钮组

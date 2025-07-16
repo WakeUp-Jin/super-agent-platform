@@ -1,7 +1,7 @@
 'use client';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Play, Check, X, PencilLine, Upload } from 'lucide-react';
+import { Play, Check, X, PencilLine, Upload, LoaderCircle } from 'lucide-react';
 import { ViewBoardStoryTwoInterface, ViewTwoValueItemFormat } from '@/lib/interface/viewInterface';
 import { StoryTwoTextItem } from './StoryTwoTextItem';
 import { StoryTwoSfxItem } from './StoryTwoSfxItem';
@@ -233,12 +233,17 @@ export const StoryTwoContainer: React.FC<StoryTwoContainerProps> = ({
       case 'normal':
         return (
           <div className="flex items-center gap-2">
-            <PlayButton
-              value={storyItem.originValue}
-              className={BUTTON_STYLES.playDefault}
-              onClick={() => handlePlay(storyItem.originValue)}
-              forceShow={forceShowButtons}
-            />
+            {/* 上传状态：显示加载器，隐藏播放按钮 */}
+            {isUploading ? (
+              <LoaderCircle className="h-3 w-3 animate-spin" />
+            ) : (
+              <PlayButton
+                value={storyItem.originValue}
+                className={BUTTON_STYLES.playDefault}
+                onClick={() => handlePlay(storyItem.originValue)}
+                forceShow={forceShowButtons}
+              />
+            )}
             <DropdownMenu onOpenChange={setForceShowButtons}>
               <DropdownMenuTrigger>
                 <EditButton className={BUTTON_STYLES.playDefault} forceShow={forceShowButtons} />
@@ -267,12 +272,17 @@ export const StoryTwoContainer: React.FC<StoryTwoContainerProps> = ({
             : storyItem.updateValue;
         return (
           <div className="flex items-center gap-2">
-            <PlayButton
-              value={selectedValue}
-              className={BUTTON_STYLES.playDefault}
-              onClick={() => handlePlay(selectedValue)}
-              forceShow={forceShowButtons}
-            />
+            {/* 上传状态：显示加载器，隐藏播放按钮 */}
+            {isUploading ? (
+              <LoaderCircle className="h-3 w-3 animate-spin" />
+            ) : (
+              <PlayButton
+                value={selectedValue}
+                className={BUTTON_STYLES.playDefault}
+                onClick={() => handlePlay(selectedValue)}
+                forceShow={forceShowButtons}
+              />
+            )}
             <DropdownMenu onOpenChange={setForceShowButtons}>
               <DropdownMenuTrigger>
                 <EditButton className={BUTTON_STYLES.playDefault} forceShow={forceShowButtons} />
@@ -295,7 +305,7 @@ export const StoryTwoContainer: React.FC<StoryTwoContainerProps> = ({
           </div>
         );
     }
-  }, [storyItem, handlePlay, forceShowButtons]);
+  }, [storyItem, handlePlay, forceShowButtons, isUploading, openFileDialog]);
 
   // 渲染审核按钮组
   const renderActionButtons = useCallback(() => {
