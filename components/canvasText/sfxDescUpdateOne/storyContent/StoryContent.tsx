@@ -21,7 +21,10 @@ export function StoryContent() {
   const checkAllReviewCompleted = (currentStoryData: StoryItem[]) => {
     const allNotPending = currentStoryData.every((item) => item.status !== 'pending');
     const isExitSfx = currentStoryData.some((item) => item.type === 'sfx');
-    if (allNotPending && isExitSfx) {
+    const allIsNormal = currentStoryData.every((item) => item.status === 'normal');
+    console.log(currentStoryData);
+    console.log('🚀 ~ checkAllReviewCompleted ~ allIsNormal:', allIsNormal);
+    if (allNotPending && isExitSfx && !allIsNormal) {
       // TODO: 在这里添加修改画本的请求
       // 所有审核已完成，发起修改画本请求
       console.log(currentStoryData);

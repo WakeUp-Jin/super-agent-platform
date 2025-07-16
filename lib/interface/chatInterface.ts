@@ -1,6 +1,12 @@
 export interface SendMessageRequest {
   userInput: string;
-  inputParam?: any;
+  inputParam?: SendMessageInputParam;
+}
+
+export interface SendMessageInputParam {
+  userId: string;
+  sessionId: string;
+  messageId: string;
 }
 
 export interface StreamEventData {
@@ -9,6 +15,8 @@ export interface StreamEventData {
   data: any;
   timestamp?: string;
 }
+
+export type ViewType = 'oneText' | 'twoAudio';
 
 // 具体的事件数据类型
 export interface AgentEventData {
@@ -21,6 +29,7 @@ export interface AgentEventData {
   agentResult?: string;
   chatAgentContent?: any;
   shouldQueryRedis?: string;
+  viewType?: ViewType;
   timestamp: string;
 }
 

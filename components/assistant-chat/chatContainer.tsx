@@ -11,8 +11,17 @@ import { EllipsisVertical, Columns2, SquarePen } from 'lucide-react';
 import { UserMessageItem } from './UserMessageItem';
 import { AssistantMessage } from './AssistantMessage';
 import { ScrollArea } from '../ui/scroll-area';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Toggle } from '@radix-ui/react-toggle';
 import { useChatStream, Message } from '@/lib/useChatStream';
+import { useButtonStore } from '@/lib/store/useButtonStore';
 
 /**
  * ChatContainer                // 顶层容器，管理整体聊天流程
@@ -29,9 +38,13 @@ import { useChatStream, Message } from '@/lib/useChatStream';
 
 interface ChatProps {
   // 使用内置的聊天状态管理，不需要外部传入
+  stepView: string; // 画本视图步骤
+  setStepView: (stepView: string) => void;
 }
 
-export function ChatContainer({}: ChatProps) {
+export function ChatContainer({ stepView, setStepView }: ChatProps) {
+  // 使用全局按钮状态 store
+  const { isTextOneButtonDisabled, isAudioOneButtonDisabled } = useButtonStore();
   // 使用聊天流Hook
   const { messages, loading, error, sendMessage, clearMessages } = useChatStream();
 
@@ -89,9 +102,28 @@ export function ChatContainer({}: ChatProps) {
           </Button>
         </div>
         <div className="flex items-center pr-3">
-          <Button variant="ghost" className="cursor-pointer rounded-full py-0">
-            <EllipsisVertical className="size-5" />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="cursor-pointer rounded-full py-0">
+                <EllipsisVertical className="size-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="min-w-max">
+              {/* <DropdownMenuLabel>My Account</DropdownMenuLabel> */}
+              <DropdownMenuItem
+                onSelect={() => setStepView('textOne')}
+                disabled={isTextOneButtonDisabled}
+              >
+                文本审核{isTextOneButtonDisabled ? 'true' : 'false'}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onSelect={() => setStepView('audioOne')}
+                disabled={isAudioOneButtonDisabled}
+              >
+                音频审核{isAudioOneButtonDisabled ? 'true' : 'false'}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 

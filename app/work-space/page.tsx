@@ -4,38 +4,71 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/componen
 import { ChatContainer } from '@/components/assistant-chat/ChatContainer';
 import { SfxDescUpdate } from '@/components/canvasText/sfxDescUpdateOne/SfxDescUpdate';
 import { VoiceFileAccept } from '@/components/canvasText/voiceFileAcceptTwo/VoiceFileAccept';
+import { useState, useEffect } from 'react';
+import { getView } from '@/lib/api/view';
+import { useViewBoardStore } from '@/lib/store/useViewBoardStore';
+import { useViewBoardTwoStore } from '@/lib/store/useViewBoardStore';
+import { useButtonStore } from '@/lib/store/useButtonStore';
 
 export default function ResizablePanels() {
-  let aiMessage = `
-  ## Overview
- 
- * Follows [CommonMark](https://commonmark.org)
- * Optionally follows [GitHub Flavored Markdown](https://github.github.com/gfm/)
- * Renders actual React elements instead of using \`dangerouslySetInnerHTML\`
- * Lets you define your own components (to render \`MyHeading\` instead of \`'h1'\`)
- * Has a lot of plugins
-   `;
+  const { board, setBoard } = useViewBoardStore();
+  const { boardTwo, setBoardTwo, updateBoardTwo, clearBoardTwo } = useViewBoardTwoStore();
 
-  let userMessage =
-    '很长很长很长很长很长很长的文字，如果文字超出了最大宽度就会自动换行，没有最大高度限制，能一直往下撑开……';
+  // 使用全局按钮状态 store
+  const {
+    isTextOneButtonDisabled,
+    isAudioOneButtonDisabled,
+    setTextOneButtonDisabled,
+    setAudioOneButtonDisabled,
+  } = useButtonStore();
 
-  let messages = [
-    {
-      id: '1',
-      role: 'user' as const,
-      content: userMessage,
-    },
-    {
-      id: '2',
-      role: 'assistant' as const,
-      content: aiMessage,
-    },
-    {
-      id: '3',
-      role: 'user' as const,
-      content: userMessage,
-    },
-  ];
+  //音频审核画本数据加载状态-骨架加载
+  const [isTwoLoading, setIsTwoLoading] = useState(true);
+
+  //切换画本视图步骤的按钮
+  let [stepView, setStepView] = useState('textOne');
+
+  //获取文本审核画本数据
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await getView({
+        userId: '123',
+        sessionId: '456',
+        viewStep: 'oneText',
+      });
+      console.log(data);
+      if (data.title) {
+        setTextOneButtonDisabled(false);
+      }
+      setBoard(data);
+    };
+    fetchData();
+  }, [setBoard]);
+
+  //获取音频审核画本数据
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsTwoLoading(true);
+        const data = await getView({
+          userId: '123',
+          sessionId: '456',
+          viewStep: 'twoAudio',
+        });
+        console.log(data);
+        if (data.length !== 0) {
+          setAudioOneButtonDisabled(false);
+        }
+
+        setBoardTwo({ storyData: data, title: '' });
+      } catch (error) {
+        console.error('获取数据失败:', error);
+      } finally {
+        setIsTwoLoading(false);
+      }
+    };
+    fetchData();
+  }, [setBoardTwo]);
 
   return (
     <ResizablePanelGroup direction="horizontal" className="h-screen">
@@ -44,14 +77,16 @@ export default function ResizablePanels() {
           {/* <span className="font-semibold">Sidebar</span>
            */}
           {/* <ChatContainer messages={messages} onSend={() => {}} /> */}
-          <ChatContainer></ChatContainer>
+          <ChatContainer stepView={stepView} setStepView={setStepView}></ChatContainer>
         </div>
       </ResizablePanel>
       <ResizableHandle withHandle />
       <ResizablePanel defaultSize={65}>
         <div className="flex h-full w-full p-5">
-          {/* <SfxDescUpdate></SfxDescUpdate> */}
-          <VoiceFileAccept></VoiceFileAccept>
+          {stepView === 'textOne' && <SfxDescUpdate></SfxDescUpdate>}
+          {stepView === 'audioOne' && (
+            <VoiceFileAccept isTwoLoading={isTwoLoading}></VoiceFileAccept>
+          )}
         </div>
       </ResizablePanel>
     </ResizablePanelGroup>

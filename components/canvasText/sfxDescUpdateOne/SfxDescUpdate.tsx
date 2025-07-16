@@ -19,19 +19,19 @@ export function SfxDescUpdate() {
   const { isShowSfxAddress, toggleSfxAddress } = useUiStore();
   const { board, setBoard } = useViewBoardStore();
 
-  // 首次挂载时拉取数据
-  useEffect(() => {
-    const fetchData = async () => {
-      const data = await getView({
-        userId: '123',
-        sessionId: '456',
-        viewStep: '1',
-      });
-      console.log(data);
-      setBoard(data);
-    };
-    fetchData();
-  }, [setBoard]);
+  // // 首次挂载时拉取数据
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     const data = await getView({
+  //       userId: '123',
+  //       sessionId: '456',
+  //       viewStep: '1',
+  //     });
+  //     console.log(data);
+  //     setBoard(data);
+  //   };
+  //   fetchData();
+  // }, [setBoard]);
 
   //标题
   const [title, setTitle] = useState('');

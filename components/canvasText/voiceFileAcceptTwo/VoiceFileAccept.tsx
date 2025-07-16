@@ -17,34 +17,34 @@ import { allStatusIsNormal, allStatusNotPending } from './utils';
 import { createBoardStoryDiff } from '@/lib/api/view';
 import { useVoiceFileStore } from '@/lib/store/useVoiceFileStore';
 
-export function VoiceFileAccept() {
+export function VoiceFileAccept({ isTwoLoading }: { isTwoLoading: boolean }) {
   const [storyData, setStoryData] = useState<ViewBoardStoryTwoInterface[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  // const [isLoading, setIsLoading] = useState(true);
 
   const { boardTwo, setBoardTwo, updateBoardTwo, clearBoardTwo } = useViewBoardTwoStore();
   const { isBottomPanelVisible, toggleBottomPanel } = useAudioPlayerStore();
   const { setStoryDataUpdater } = useVoiceFileStore();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        const data = await getView({
-          userId: '123',
-          sessionId: '456',
-          viewStep: '2',
-        });
-        console.log(data);
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       setIsLoading(true);
+  //       const data = await getView({
+  //         userId: '123',
+  //         sessionId: '456',
+  //         viewStep: '2',
+  //       });
+  //       console.log(data);
 
-        setBoardTwo({ storyData: data, title: '' });
-      } catch (error) {
-        console.error('获取数据失败:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchData();
-  }, [setBoardTwo]);
+  //       setBoardTwo({ storyData: data, title: '' });
+  //     } catch (error) {
+  //       console.error('获取数据失败:', error);
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   };
+  //   fetchData();
+  // }, [setBoardTwo]);
 
   //监听store的全局状态boardTwo的变化
   useEffect(() => {
@@ -227,7 +227,7 @@ export function VoiceFileAccept() {
             </Button>
           </div>
 
-          {isLoading ? (
+          {isTwoLoading ? (
             <SkeletonLoader />
           ) : (
             <div className="flex flex-col gap-3">

@@ -18,7 +18,7 @@ import {
 // 常量定义
 const CONTAINER_STYLES = {
   pending: 'bg-gray-100 border-l-4',
-  default: 'bg-gray-200',
+  default: 'bg-gray-100',
 } as const;
 
 const TITLE_STYLES = {

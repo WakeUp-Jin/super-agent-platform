@@ -1,8 +1,9 @@
 import { useState, useCallback } from 'react';
 import { sendMessageStreamReadable } from './stream';
 import { SendMessageRequest, StreamEventData, AgentEventData } from './interface/chatInterface';
-import { useViewBoardStore } from './store/useViewBoardStore';
+import { useViewBoardStore, useViewBoardTwoStore } from './store/useViewBoardStore';
 import { getView } from './api/view';
+import { useButtonStore } from './store/useButtonStore';
 
 export interface Message {
   id: string;
@@ -88,17 +89,34 @@ export function useChatStream() {
       //处理编辑节点
       if (eventData.agentId.includes('editAgentNode') && eventData.shouldQueryRedis === '2') {
         const { setBoard } = useViewBoardStore.getState();
-        const { userId, sessionId } = request.inputParam;
+        const { setBoardTwo } = useViewBoardTwoStore.getState();
+        const {
+          setTextOneButtonDisabled,
+          isTextOneButtonDisabled,
+          setAudioOneButtonDisabled,
+          isAudioOneButtonDisabled,
+        } = useButtonStore.getState();
+
+        const { userId, sessionId, messageId } = request.inputParam || {};
 
         // 直接使用 async/await，无需包装函数
         getView({
           sessionId: sessionId || '456-debug3-800',
           userId: userId || '123',
-          viewStep: '1',
+          viewStep: eventData.viewType || 'oneText',
         })
           .then((data) => {
             console.log('编辑节点更新画本数据:', data);
-            setBoard(data);
+
+            if (eventData.viewType === 'oneText') {
+              setTextOneButtonDisabled(false);
+              console.log('textOneButtonDisabled', isTextOneButtonDisabled);
+              setBoard(data);
+            } else if (eventData.viewType === 'twoAudio') {
+              setAudioOneButtonDisabled(false);
+              console.log('audioOneButtonDisabled', isAudioOneButtonDisabled);
+              setBoardTwo(data);
+            }
           })
           .catch((error) => {
             console.error('获取画本数据失败:', error);
