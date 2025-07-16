@@ -3,6 +3,7 @@ import {
   ViewTwoValueItemFormat,
   ViewBoardStoryTwoInterface,
 } from '@/lib/interface/viewInterface';
+import { useCallback } from 'react';
 
 /**
  * 根据状态获取对应的值
@@ -98,4 +99,36 @@ export function allStatusIsNormal(currentBoardData: any) {
   }
 
   return true;
+}
+
+// 计算所有嵌套层级的pending数量
+export function countAllPendingItems(currentBoardData: ViewBoardStoryTwoInterface[]): number {
+  let pendingCount = 0;
+
+  currentBoardData.forEach((story) => {
+    // 检查故事级别的状态
+    if (story.status === 'pending') {
+      pendingCount++;
+    }
+
+    // 检查story的items数组
+    if (Array.isArray(story.items)) {
+      story.items.forEach((item) => {
+        if (item.type === 'text' && item.status === 'pending') {
+          pendingCount++;
+        }
+
+        // 如果是音效类型，检查valuesList中的状态
+        if (item.type === 'sfx' && Array.isArray(item.valuesList)) {
+          item.valuesList.forEach((value) => {
+            if (value.status === 'pending') {
+              pendingCount++;
+            }
+          });
+        }
+      });
+    }
+  });
+
+  return pendingCount;
 }

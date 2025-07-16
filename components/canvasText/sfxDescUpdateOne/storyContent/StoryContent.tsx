@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { StoryItem, SfxMeta } from '@/lib/interface/viewInterface';
 import { StoryItemComponent } from './StoryItemComponent';
 import { useViewBoardStore } from '@/lib/store/useViewBoardStore';
@@ -12,42 +12,69 @@ export function StoryContent() {
   const [storyData, setStoryData] = useState<StoryItem[]>([]);
   const [sfxMeta, setSfxMeta] = useState<SfxMeta[]>([]);
 
+  // 跟踪上一次的pending状态
+  const previousPendingCountRef = useRef<number>(0);
+  const isFirstLoadRef = useRef<boolean>(true);
+
   useEffect(() => {
     setStoryData(board?.audioScript?.storyItems ?? []);
     setSfxMeta(board?.audioScript?.sfxMetas ?? []);
   }, [board]);
 
-  // 检查是否所有审核都已完成
-  const checkAllReviewCompleted = (currentStoryData: StoryItem[]) => {
-    const allNotPending = currentStoryData.every((item) => item.status !== 'pending');
-    const isExitSfx = currentStoryData.some((item) => item.type === 'sfx');
-    const allIsNormal = currentStoryData.every((item) => item.status === 'normal');
-    console.log(currentStoryData);
-    console.log('🚀 ~ checkAllReviewCompleted ~ allIsNormal:', allIsNormal);
-    if (allNotPending && isExitSfx && !allIsNormal) {
-      // TODO: 在这里添加修改画本的请求
-      // 所有审核已完成，发起修改画本请求
-      console.log(currentStoryData);
-      console.log('所有审核已完成，准备发起修改画本请求');
+  // 检测审核完成的逻辑
+  const checkReviewCompleted = useCallback((currentStoryData: StoryItem[]) => {
+    // 计算当前pending的数量
+    const currentPendingCount = currentStoryData.filter((item) => item.status === 'pending').length;
+    const previousPendingCount = previousPendingCountRef.current;
+
+    // 检查是否存在sfx类型的项目
+    const hasSfxItems = currentStoryData.some((item) => item.type === 'sfx');
+
+    console.log('审核状态检测:', {
+      currentPendingCount,
+      previousPendingCount,
+      hasSfxItems,
+      isFirstLoad: isFirstLoadRef.current,
+    });
+
+    // 条件判断：
+    // 1. 不是首次加载（避免初始化时误触发）
+    // 2. 之前有pending项目，现在没有pending项目（最后一个pending变为了其他状态）
+    // 3. 存在sfx类型的项目
+    if (
+      !isFirstLoadRef.current &&
+      previousPendingCount > 0 &&
+      currentPendingCount === 0 &&
+      hasSfxItems
+    ) {
+      console.log('🎉 检测到审核完成：最后一个pending项目已变为review状态');
+      console.log('当前故事数据:', currentStoryData);
+
+      // 触发更新画本请求
       createBoardStoryDiff({
         sessionId: '456',
         userId: '123',
       })
         .then((res) => {
-          console.log('更新后端画本数据成功', res);
+          console.log('✅ 更新后端画本数据成功', res);
         })
         .catch((err) => {
-          console.log('更新后端画本数据失败', err);
+          console.error('❌ 更新后端画本数据失败', err);
         });
     }
-  };
 
-  // 监听storyData变化，检查是否所有审核都已完成
+    // 更新上一次的pending数量
+    previousPendingCountRef.current = currentPendingCount;
+    // 标记已经不是首次加载了
+    isFirstLoadRef.current = false;
+  }, []);
+
+  // 监听storyData变化，检查审核完成状态
   useEffect(() => {
     if (storyData.length > 0) {
-      checkAllReviewCompleted(storyData);
+      checkReviewCompleted(storyData);
     }
-  }, [storyData]);
+  }, [storyData, checkReviewCompleted]);
 
   // 当全局 board 更新时同步本地可编辑 state
   // 处理审核同意

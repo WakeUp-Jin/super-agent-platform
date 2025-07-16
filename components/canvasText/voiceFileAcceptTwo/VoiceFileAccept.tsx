@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { produce } from 'immer';
 import { mockViewBoardStoryTwoData } from '@/lib/mock/viewBoardStoryTwoData';
 import { ViewBoardStoryTwoInterface, ViewTwoSfxItemFormat } from '@/lib/interface/viewInterface';
@@ -13,7 +13,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { PlayerAudio } from '@/components/common/PlayerAudio';
 import { Button } from '@/components/ui/button';
 import { SkeletonLoader } from '@/components/common/SkeletonLoader';
-import { allStatusIsNormal, allStatusNotPending } from './utils';
+import { allStatusIsNormal, allStatusNotPending, countAllPendingItems } from './utils';
 import { createBoardStoryDiff } from '@/lib/api/view';
 import { useVoiceFileStore } from '@/lib/store/useVoiceFileStore';
 
@@ -25,26 +25,9 @@ export function VoiceFileAccept({ isTwoLoading }: { isTwoLoading: boolean }) {
   const { isBottomPanelVisible, toggleBottomPanel } = useAudioPlayerStore();
   const { setStoryDataUpdater } = useVoiceFileStore();
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       setIsLoading(true);
-  //       const data = await getView({
-  //         userId: '123',
-  //         sessionId: '456',
-  //         viewStep: '2',
-  //       });
-  //       console.log(data);
-
-  //       setBoardTwo({ storyData: data, title: '' });
-  //     } catch (error) {
-  //       console.error('获取数据失败:', error);
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   };
-  //   fetchData();
-  // }, [setBoardTwo]);
+  // 跟踪上一次的pending状态
+  const previousPendingCountRef = useRef<number>(0);
+  const isFirstLoadRef = useRef<boolean>(true);
 
   //监听store的全局状态boardTwo的变化
   useEffect(() => {
@@ -58,35 +41,60 @@ export function VoiceFileAccept({ isTwoLoading }: { isTwoLoading: boolean }) {
     return () => setStoryDataUpdater(null);
   }, [setStoryDataUpdater]);
 
-  //监听storyData的变化，发起创建画本的请求
+  // 检测审核完成的逻辑
+  const checkAllReviewCompletedTwo = useCallback(
+    (currentBoardData: ViewBoardStoryTwoInterface[]) => {
+      // 计算当前pending的数量
+      const currentPendingCount = countAllPendingItems(currentBoardData);
+      const previousPendingCount = previousPendingCountRef.current;
+
+      console.log('VoiceFileAccept审核状态检测:', {
+        currentPendingCount,
+        previousPendingCount,
+        isFirstLoad: isFirstLoadRef.current,
+      });
+
+      // 条件判断：
+      // 1. 不是首次加载（避免初始化时误触发）
+      // 2. 之前有pending项目，现在没有pending项目（最后一个pending变为了reviewed）
+      // 3. 确保数据不为空
+      if (
+        !isFirstLoadRef.current &&
+        previousPendingCount > 0 &&
+        currentPendingCount === 0 &&
+        currentBoardData.length > 0
+      ) {
+        console.log('🎉 VoiceFileAccept检测到审核完成：最后一个pending项目已变为reviewed状态');
+        console.log('当前画本数据:', currentBoardData);
+
+        // 触发更新画本请求
+        createBoardStoryDiff({
+          sessionId: '456',
+          userId: '123',
+          viewStep: '2',
+        })
+          .then((res) => {
+            console.log('✅ VoiceFileAccept更新后端画本数据成功', res);
+          })
+          .catch((err) => {
+            console.error('❌ VoiceFileAccept更新后端画本数据失败', err);
+          });
+      }
+
+      // 更新上一次的pending数量
+      previousPendingCountRef.current = currentPendingCount;
+      // 标记已经不是首次加载了
+      isFirstLoadRef.current = false;
+    },
+    [countAllPendingItems]
+  );
+
+  //监听storyData的变化，检查审核完成状态
   useEffect(() => {
     if (storyData.length > 0) {
       checkAllReviewCompletedTwo(storyData);
     }
-  }, [storyData]);
-
-  const checkAllReviewCompletedTwo = (currentBoardData: ViewBoardStoryTwoInterface[]) => {
-    const allBgmNotPending = currentBoardData.every((item) => allStatusNotPending(item));
-    console.log('🚀 ~ checkAllReviewCompletedTwo ~ allBgmNotPending:', allBgmNotPending);
-
-    const allBgmIsNormal = currentBoardData.every((item) => allStatusIsNormal(item));
-    console.log('🚀 ~ checkAllReviewCompletedTwo ~ allBgmIsNormal:', allBgmIsNormal);
-
-    if (allBgmNotPending && !allBgmIsNormal) {
-      console.log('所有审核已完成，准备发起修改画本请求');
-      createBoardStoryDiff({
-        sessionId: '456',
-        userId: '123',
-        viewStep: '2',
-      })
-        .then((res) => {
-          console.log('更新后端画本数据成功', res);
-        })
-        .catch((err) => {
-          console.log('更新后端画本数据失败', err);
-        });
-    }
-  };
+  }, [storyData, checkAllReviewCompletedTwo]);
 
   // 通用的 API 调用函数
   const callUpdateViewAPI = async (filePath: string[] | string, approved: boolean) => {

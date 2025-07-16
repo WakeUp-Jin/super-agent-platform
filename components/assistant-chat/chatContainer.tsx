@@ -22,6 +22,7 @@ import {
 import { Toggle } from '@radix-ui/react-toggle';
 import { useChatStream, Message } from '@/lib/useChatStream';
 import { useButtonStore } from '@/lib/store/useButtonStore';
+import { v4 as uuidv4 } from 'uuid';
 
 /**
  * ChatContainer                // 顶层容器，管理整体聊天流程
@@ -64,7 +65,7 @@ export function ChatContainer({ stepView, setStepView }: ChatProps) {
       sendMessage(input, {
         userId: '123',
         sessionId: '456',
-        messageId: '789',
+        messageId: uuidv4(),
       });
       setInput('');
       inputRef.current?.focus();
