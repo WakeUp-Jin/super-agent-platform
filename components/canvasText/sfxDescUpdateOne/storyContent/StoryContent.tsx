@@ -54,6 +54,7 @@ export function StoryContent() {
       createBoardStoryDiff({
         sessionId: '456',
         userId: '123',
+        viewType: 'oneText',
       })
         .then((res) => {
           console.log('✅ 更新后端画本数据成功', res);

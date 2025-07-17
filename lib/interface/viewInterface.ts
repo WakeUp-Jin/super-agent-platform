@@ -1,8 +1,10 @@
+import { ViewType } from './chatInterface';
+
 //视图请求接口参数
 export interface ViewRequestInterface {
   sessionId: string;
   userId: string;
-  viewStep: string; // 视图步骤
+  viewType: ViewType; // 视图步骤
 }
 
 //更新画本数据请求接口参数
@@ -18,7 +20,7 @@ export interface UpdateViewRequestInterface {
 export interface CreateBoardStoryDiffRequestInterface {
   sessionId: string;
   userId: string;
-  viewStep?: string;
+  viewType?: ViewType;
 }
 
 //视图画本的结构-第一步

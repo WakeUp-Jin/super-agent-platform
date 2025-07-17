@@ -34,7 +34,7 @@ export default function ResizablePanels() {
       const data = await getView({
         userId: '123',
         sessionId: '456',
-        viewStep: 'oneText',
+        viewType: 'oneText',
       });
       console.log(data);
       if (data.title) {
@@ -53,14 +53,14 @@ export default function ResizablePanels() {
         const data = await getView({
           userId: '123',
           sessionId: '456',
-          viewStep: 'twoAudio',
+          viewType: 'twoAudio',
         });
         console.log(data);
-        if (data.length !== 0) {
+        if (data.storyData.length !== 0) {
           setAudioOneButtonDisabled(false);
         }
 
-        setBoardTwo({ storyData: data, title: '' });
+        setBoardTwo(data);
       } catch (error) {
         console.error('获取数据失败:', error);
       } finally {

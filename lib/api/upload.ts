@@ -16,6 +16,8 @@ export interface UploadParams {
   sessionId?: string;
   storyBoardIndex?: number | string;
   storyBoardIndexType?: 'bgm' | 'audioPeople' | 'sfx';
+  valueIndex?: number;
+  itemIndex?: number;
 }
 
 export const Token =
@@ -27,7 +29,15 @@ export const Token =
  * @returns Promise<UploadResponse>
  */
 export async function uploadAudioFile(params: UploadParams): Promise<UploadResponse> {
-  const { file, userId = '123', storyBoardIndex, sessionId, storyBoardIndexType } = params;
+  const {
+    file,
+    userId = '123',
+    storyBoardIndex,
+    sessionId,
+    storyBoardIndexType,
+    itemIndex,
+    valueIndex,
+  } = params;
 
   try {
     // 验证文件类型
@@ -64,6 +74,12 @@ export async function uploadAudioFile(params: UploadParams): Promise<UploadRespo
     // 添加位置信息
     if (storyBoardIndex !== undefined)
       formData.append('storyBoardIndex', storyBoardIndex.toString());
+
+    //添加itemIndex
+    if (itemIndex !== undefined) formData.append('itemIndex', itemIndex.toString());
+
+    //添加valudeIndex
+    if (valueIndex !== undefined) formData.append('valueIndex', valueIndex.toString());
 
     // 发送上传请求
     const response = await fetch(`${API_BASE_URL}/upload/file`, {

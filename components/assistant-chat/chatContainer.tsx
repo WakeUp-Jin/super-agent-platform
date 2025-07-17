@@ -105,9 +105,7 @@ export function ChatContainer({ stepView, setStepView }: ChatProps) {
         <div className="flex items-center pr-3">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="cursor-pointer rounded-full py-0">
-                <EllipsisVertical className="size-5" />
-              </Button>
+              <EllipsisVertical className="size-5 cursor-pointer" />
             </DropdownMenuTrigger>
             <DropdownMenuContent className="min-w-max">
               {/* <DropdownMenuLabel>My Account</DropdownMenuLabel> */}

@@ -103,7 +103,7 @@ export function useChatStream() {
         getView({
           sessionId: sessionId || '456-debug3-800',
           userId: userId || '123',
-          viewStep: eventData.viewType || 'oneText',
+          viewType: eventData.viewType || 'oneText',
         })
           .then((data) => {
             console.log('编辑节点更新画本数据:', data);
@@ -115,6 +115,7 @@ export function useChatStream() {
             } else if (eventData.viewType === 'twoAudio') {
               setAudioOneButtonDisabled(false);
               console.log('audioOneButtonDisabled', isAudioOneButtonDisabled);
+              console.log('data', data);
               setBoardTwo(data);
             }
           })

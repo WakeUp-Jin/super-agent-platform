@@ -132,3 +132,12 @@ export function countAllPendingItems(currentBoardData: ViewBoardStoryTwoInterfac
 
   return pendingCount;
 }
+
+/**
+ * 计算音效列表中状态为pending的项目数量
+ * @param valuesList 音效值列表
+ * @returns pending状态的项目数量
+ */
+export function countPendingSfxItems(valuesList: ViewTwoSfxValueItemFormat[]): number {
+  return valuesList.filter((item) => item.status === 'pending').length;
+}

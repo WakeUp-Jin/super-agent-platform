@@ -6,7 +6,7 @@ import { ChevronsDown, ChevronsUp, Play } from 'lucide-react';
 import { ViewTwoSfxItemFormat } from '@/lib/interface/viewInterface';
 import { SfxItem } from './SfxItem';
 import { useAudioPlayerStore } from '@/lib/store/useAudioPlayerStore';
-import { getPlayValueAllByStatus, getValueByStatus } from './utils';
+import { getPlayValueAllByStatus, getValueByStatus, countPendingSfxItems } from './utils';
 import { Badge } from '@/components/ui/badge';
 
 interface StoryTwoSfxItemProps {
@@ -95,6 +95,11 @@ export const StoryTwoSfxItem: React.FC<StoryTwoSfxItemProps> = ({
               <div className="text-xs text-gray-500">
                 {sfxItem.valuesList.length} 个音效项
                 {isOpen ? '' : ' - 点击展开'}
+                {countPendingSfxItems(sfxItem.valuesList) > 0 && (
+                  <span className="text-red-500">
+                    - {countPendingSfxItems(sfxItem.valuesList)} 待审核
+                  </span>
+                )}
               </div>
             </div>
           </div>

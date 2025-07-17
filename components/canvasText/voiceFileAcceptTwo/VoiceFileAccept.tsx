@@ -71,7 +71,7 @@ export function VoiceFileAccept({ isTwoLoading }: { isTwoLoading: boolean }) {
         createBoardStoryDiff({
           sessionId: '456',
           userId: '123',
-          viewStep: '2',
+          viewType: 'twoAudio',
         })
           .then((res) => {
             console.log('✅ VoiceFileAccept更新后端画本数据成功', res);
