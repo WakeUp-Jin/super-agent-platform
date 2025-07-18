@@ -69,6 +69,7 @@ export interface SfxMeta {
   sfxAddress: string;
   sfxList: string[];
   sfxAddressPath?: string;
+  storyBoardScriptId?: string; //故事版中的音效id
 }
 
 // 故事项数据结构
@@ -82,6 +83,7 @@ export interface StoryItem {
   peopleSelectValue: 'originValue' | 'updateValue' | '';
   sfxMetaId?: string; // 关联的音效描述位置ID-只要type为sfx这个就一定要有
   sfxPath?: string;
+  storyBoardScriptId?: string; //故事版中的音效id
 }
 
 //========== 视图画本的结构-第二步==========

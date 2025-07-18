@@ -6,7 +6,14 @@ import { SfxTag } from '../SfxTag';
 import { useUiStore } from '@/lib/store/useUiStore';
 
 // TextItem 组件 - 展示文本内容
-export const TextItem = ({ content, sfxMeta, onRemoveSfx, highlight, role }: TextItemProps) => {
+export const TextItem = ({
+  content,
+  sfxMeta,
+  onRemoveSfx,
+  highlight,
+  role,
+  storyBoardScriptId,
+}: TextItemProps) => {
   const { isShowSfxAddress } = useUiStore();
 
   const renderContent = () => {

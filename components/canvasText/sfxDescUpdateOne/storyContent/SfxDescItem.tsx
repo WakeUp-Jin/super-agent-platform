@@ -3,15 +3,17 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { SfxDescItemProps } from './types';
 import { CustomeTabPopover } from '../CustomeTabPopover';
-import { X, Plus, Minus, SquarePen, PenOff } from 'lucide-react';
+import { X, Plus, Minus, SquarePen, PenOff, Loader2 } from 'lucide-react';
+import { updateSfxDescAPI } from '@/lib/api/sfxDesc';
 
 // SfxDescItem 组件 - 展示和管理音效描述内容
 export const SfxDescItem = ({
   content,
   sfxMeta,
-  highlight,
   status,
   onUpdateSfxDescription,
+  storyBoardScriptId,
+  sfxDescPath,
 }: SfxDescItemProps) => {
   // 管理弹出层状态
   const [openPopover, setOpenPopover] = useState<string | null>(null);
@@ -22,6 +24,9 @@ export const SfxDescItem = ({
   // 管理输入框状态
   const [isInputVisible, setIsInputVisible] = useState(false);
   const [inputValue, setInputValue] = useState('');
+
+  // 管理loading状态的项目
+  const [loadingItems, setLoadingItems] = useState<string[]>([]);
 
   //根据status判断是否可以编辑
   const canEdit = status !== 'pending';
@@ -37,15 +42,39 @@ export const SfxDescItem = ({
   }, [isInputVisible]);
 
   // 处理标签删除确认
-  const handleConfirmDelete = (sfx: string, itemIndex: number, reason: string) => {
+  const handleConfirmDelete = async (
+    sfx: string,
+    itemIndex: number,
+    reason: string
+  ): Promise<void> => {
     if (!sfxMeta) return;
 
-    console.log(`删除音效描述 "${sfx}"，理由：${reason || '无'}`);
+    console.log(
+      `删除音效描述 "${sfx}"，序列：${itemIndex}，理由：${reason || '无'}，storyBoardScriptId：${storyBoardScriptId}`
+    );
 
-    // 创建新的描述数组，移除指定项
-    const newDescriptions = displayContent.filter((_, index) => index !== itemIndex);
-    onUpdateSfxDescription?.(sfxMeta.id, newDescriptions);
-    setOpenPopover(null);
+    try {
+      // 调用删除音效API
+      const res = await updateSfxDescAPI({
+        userId: '123',
+        sessionId: '456',
+        storyBoardScriptId: `${storyBoardScriptId}`,
+        index: itemIndex,
+        type: 'delete',
+        sfxDesc: sfx,
+        sfxDescPath: sfxDescPath || '',
+        sfxDescAddressPath: sfxMeta.sfxAddressPath || '',
+        reason,
+      });
+
+      console.log('删除音效描述成功', res);
+
+      // 只有API调用成功后才更新本地状态
+      const newDescriptions = displayContent.filter((_, index) => index !== itemIndex);
+      onUpdateSfxDescription?.(sfxMeta.id, newDescriptions);
+    } catch (err) {
+      console.log('删除音效描述失败', err);
+    }
   };
 
   // 处理添加按钮点击
@@ -59,18 +88,43 @@ export const SfxDescItem = ({
   };
 
   // 处理输入框回车
-  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleInputKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       const trimmedValue = inputValue.trim();
-      if (trimmedValue) {
-        if (sfxMeta) {
-          // 更新现有音效描述
-          const newDescriptions = [...displayContent, trimmedValue];
-          onUpdateSfxDescription?.(sfxMeta.id, newDescriptions);
-        }
-        // 添加新音效描述
+      console.log('trimmedValue', trimmedValue);
+      if (trimmedValue && sfxMeta) {
+        // 立即添加到loading状态
+        setLoadingItems((prev) => [...prev, trimmedValue]);
+
+        // 清空输入框并隐藏
         setInputValue('');
         setIsInputVisible(false);
+
+        try {
+          // 调用添加音效描述API
+          const res = await updateSfxDescAPI({
+            userId: '123',
+            sessionId: '456',
+            storyBoardScriptId: `${storyBoardScriptId}`,
+            index: displayContent.length, // 新项目添加到最后
+            type: 'add',
+            sfxDesc: trimmedValue,
+            sfxDescPath: sfxDescPath || '',
+            sfxDescAddressPath: sfxMeta.sfxAddressPath || '',
+          });
+
+          console.log('添加音效描述成功', res);
+
+          // API调用成功后，移除loading状态并更新父组件状态
+          setLoadingItems((prev) => prev.filter((item) => item !== trimmedValue));
+          const newDescriptions = [...displayContent, trimmedValue];
+          onUpdateSfxDescription?.(sfxMeta.id, newDescriptions);
+        } catch (err) {
+          console.log('添加音效描述失败', err);
+          // API调用失败，移除loading状态
+          setLoadingItems((prev) => prev.filter((item) => item !== trimmedValue));
+          // 这里可以添加错误提示
+        }
       }
     }
   };
@@ -85,7 +139,6 @@ export const SfxDescItem = ({
       <div className="flex h-full w-7/8 border-l-2 border-gray-300 pl-3">
         <div className="flex w-full flex-wrap items-center gap-3">
           {displayContent.map((item, globalIndex) => (
-            // bg-[#3c6e71]
             <Badge
               key={`${item}-${globalIndex}`}
               className={`group relative h-7 bg-[#3c6e71] text-sm`}
@@ -105,6 +158,17 @@ export const SfxDescItem = ({
                   <X className="h-3 w-3" />
                 </button>
               </CustomeTabPopover>
+            </Badge>
+          ))}
+          {loadingItems.map((item, index) => (
+            <Badge
+              key={`loading-${item}-${index}`}
+              className={`group relative h-7 bg-gray-400 text-sm`}
+            >
+              {item}
+              <div className="ml-1">
+                <Loader2 className="h-3 w-3 animate-spin" />
+              </div>
             </Badge>
           ))}
           <input

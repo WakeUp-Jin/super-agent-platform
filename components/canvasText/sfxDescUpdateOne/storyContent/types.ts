@@ -12,6 +12,7 @@ export interface TextItemProps {
   onRemoveSfx?: (sfx: string) => void;
   highlight?: boolean;
   isShowSfxAddress?: boolean;
+  storyBoardScriptId?: string;
 }
 
 export interface SfxDescItemProps {
@@ -22,6 +23,8 @@ export interface SfxDescItemProps {
   onUpdateSfxDescription?: (id: string, newDescriptions: string[]) => void;
   onDeleteSfxDescription?: (id: string) => void;
   onAddSfxDescription?: (description: string) => void;
+  storyBoardScriptId?: string;
+  sfxDescPath?: string;
 }
 
 export interface ReviewCardProps {

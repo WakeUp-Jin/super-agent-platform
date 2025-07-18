@@ -32,6 +32,8 @@ export const StoryItemComponent = ({
     // normal 或 reviewed 状态，根据 type 决定渲染什么内容组件
     let finalContent = item.originValue;
     let role = item.role;
+    let storyBoardScriptId = item.storyBoardScriptId;
+    let sfxDescPath = item.sfxPath;
 
     if (item.status === 'reviewed') {
       finalContent = item.peopleSelectValue === 'originValue' ? item.originValue : item.updateValue;
@@ -43,6 +45,7 @@ export const StoryItemComponent = ({
           <TextItem
             content={finalContent as string}
             role={role}
+            storyBoardScriptId={storyBoardScriptId}
             sfxMeta={sfxMeta}
             onRemoveSfx={(sfx) => onRemoveSfx(item.id, sfx)}
           />
@@ -55,7 +58,9 @@ export const StoryItemComponent = ({
           <SfxDescItem
             content={finalContent as string[]}
             sfxMeta={sfxMeta}
+            storyBoardScriptId={storyBoardScriptId}
             onUpdateSfxDescription={onUpdateSfxDescription}
+            sfxDescPath={sfxDescPath}
           />
         </div>
       );

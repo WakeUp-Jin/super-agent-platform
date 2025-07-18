@@ -35,6 +35,8 @@ export const ReviewCard = ({
           status={item.status}
           // highlight={highlight}
           onUpdateSfxDescription={onUpdateSfxDescription}
+          sfxDescPath={item.sfxPath}
+          storyBoardScriptId={item.storyBoardScriptId}
         />
       );
     }

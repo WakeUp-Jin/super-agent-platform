@@ -119,6 +119,8 @@ export function useStoreVoiceUpload({
     userId,
     sessionId,
     storyBoardIndexType,
+    valueIndex,
+    itemIndex,
   };
 
   // 成功回调函数
