@@ -1,21 +1,90 @@
-import React from 'react';
+'use client';
+import React, { useCallback, useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { StoryItemComponentProps } from './types';
 import { TextItem } from './TextItem';
 import { SfxDescItem } from './SfxDescItem';
 import { ReviewCard } from './ReviewCard';
 
-// 主要的故事项组件
-export const StoryItemComponent = ({
+// 常量定义
+const CONTAINER_STYLES = {
+  base: 'flex h-full w-full gap-2 rounded transition-colors duration-200 hover:bg-yellow-50',
+  contentWrapper: 'relative h-full w-full',
+} as const;
+
+// 类型定义
+interface ContentRendererProps {
+  item: StoryItemComponentProps['item'];
+  content: string | string[];
+  sfxMeta?: StoryItemComponentProps['sfxMeta'];
+  onRemoveSfx: (sfx: string) => void;
+  onUpdateSfxDescription?: StoryItemComponentProps['onUpdateSfxDescription'];
+}
+
+// 内容渲染器子组件
+const ContentRenderer: React.FC<ContentRendererProps> = ({
+  item,
+  content,
+  sfxMeta,
+  onRemoveSfx,
+  onUpdateSfxDescription,
+}) => {
+  if (item.type === 'text') {
+    return (
+      <TextItem
+        content={content as string}
+        role={item.role}
+        storyBoardScriptId={item.storyBoardScriptId}
+        sfxMeta={sfxMeta}
+        onRemoveSfx={onRemoveSfx}
+      />
+    );
+  }
+
+  return (
+    <SfxDescItem
+      content={content as string[]}
+      sfxMeta={sfxMeta}
+      storyBoardScriptId={item.storyBoardScriptId}
+      onUpdateSfxDescription={onUpdateSfxDescription}
+      sfxDescPath={item.sfxPath}
+    />
+  );
+};
+
+// 主组件
+export const StoryItemComponent: React.FC<StoryItemComponentProps> = ({
   item,
   onApprove,
   onReject,
   onRemoveSfx,
-  sfxMeta = undefined,
+  sfxMeta,
   onUpdateSfxDescription,
-}: StoryItemComponentProps) => {
-  const renderContent = () => {
-    // 根据 status 决定渲染什么组件
+}) => {
+  // 计算最终显示的内容 - 使用 useMemo 优化
+  const finalContent = useMemo(() => {
+    switch (item.status) {
+      case 'pending':
+        return item.originValue;
+      case 'reviewed':
+        return item.peopleSelectValue === 'originValue' ? item.originValue : item.updateValue;
+      case 'normal':
+      default:
+        return item.originValue;
+    }
+  }, [item.status, item.peopleSelectValue, item.originValue, item.updateValue]);
+
+  // 事件处理函数 - 使用 useCallback 优化
+  const handleRemoveSfx = useCallback(
+    (sfx: string) => {
+      onRemoveSfx(item.id, sfx);
+    },
+    [onRemoveSfx, item.id]
+  );
+
+  // 渲染内容组件 - 使用 useCallback 优化
+  const renderContent = useCallback(() => {
+    // pending状态使用ReviewCard进行对比显示
     if (item.status === 'pending') {
       return (
         <ReviewCard
@@ -29,47 +98,28 @@ export const StoryItemComponent = ({
       );
     }
 
-    // normal 或 reviewed 状态，根据 type 决定渲染什么内容组件
-    let finalContent = item.originValue;
-    let role = item.role;
+    // normal 或 reviewed 状态显示最终内容
+    return (
+      <div className={CONTAINER_STYLES.contentWrapper}>
+        <ContentRenderer
+          item={item}
+          content={finalContent}
+          sfxMeta={sfxMeta}
+          onRemoveSfx={handleRemoveSfx}
+          onUpdateSfxDescription={onUpdateSfxDescription}
+        />
+      </div>
+    );
+  }, [
+    item,
+    finalContent,
+    sfxMeta,
+    handleRemoveSfx,
+    onApprove,
+    onReject,
+    onRemoveSfx,
+    onUpdateSfxDescription,
+  ]);
 
-    if (item.status === 'reviewed') {
-      finalContent = item.peopleSelectValue === 'originValue' ? item.originValue : item.updateValue;
-    }
-
-    if (item.type === 'text') {
-      return (
-        <div className="relative h-full w-full">
-          <TextItem
-            content={finalContent as string}
-            role={role}
-            sfxMeta={sfxMeta}
-            onRemoveSfx={(sfx) => onRemoveSfx(item.id, sfx)}
-          />
-        </div>
-      );
-    } else {
-      // 音效描述类型，使用关联的音效描述数据
-      return (
-        <div className="relative h-full w-full">
-          <SfxDescItem
-            content={finalContent as string[]}
-            sfxMeta={sfxMeta}
-            onUpdateSfxDescription={onUpdateSfxDescription}
-          />
-        </div>
-      );
-    }
-  };
-
-  return (
-    <div className="flex h-full w-full gap-2 rounded transition-colors duration-200 hover:bg-yellow-50">
-      {/* <div className="flex w-1/8 self-stretch text-right font-sans text-base/6">
-        <p className="flex h-full w-full items-start justify-end font-medium text-gray-700">
-          {item.role}
-        </p>
-      </div> */}
-      {renderContent()}
-    </div>
-  );
+  return <div className={CONTAINER_STYLES.base}>{renderContent()}</div>;
 };

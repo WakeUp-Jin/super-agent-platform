@@ -11,7 +11,7 @@ interface CustomeTabPopoverProps {
   description?: string;
   placeholder?: string;
   buttonText?: string;
-  onConfirm: (reason: string) => void;
+  onConfirm: (reason: string) => Promise<void> | void;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }
@@ -27,19 +27,30 @@ export function CustomeTabPopover({
   onOpenChange,
 }: CustomeTabPopoverProps) {
   const [reason, setReason] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const handleConfirm = () => {
-    onConfirm(reason);
-    setReason('');
+  const handleConfirm = async () => {
+    setIsLoading(true);
+    try {
+      await onConfirm(reason);
+      console.log('reason', reason);
+      setReason('');
+      onOpenChange?.(false);
+    } catch (error) {
+      console.error('操作失败:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleClose = () => {
+    if (isLoading) return; // loading状态下不允许关闭
     setReason('');
     onOpenChange?.(false);
   };
 
   return (
-    <Popover open={open} onOpenChange={onOpenChange}>
+    <Popover open={open} onOpenChange={isLoading ? undefined : onOpenChange}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
       <PopoverContent className="w-64">
         <div className="flex flex-col gap-4">
@@ -50,8 +61,9 @@ export function CustomeTabPopover({
             </div>
             <button
               type="button"
-              className="ring-offset-background focus:ring-ring cursor-pointer rounded-full opacity-70 transition-opacity hover:opacity-100"
+              className="ring-offset-background focus:ring-ring cursor-pointer rounded-full opacity-70 transition-opacity hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-30"
               onClick={handleClose}
+              disabled={isLoading}
             >
               <X className="h-4 w-4" />
             </button>
@@ -61,11 +73,17 @@ export function CustomeTabPopover({
               placeholder={placeholder}
               value={reason}
               onChange={(e) => setReason(e.target.value)}
+              disabled={isLoading}
             />
           </div>
           <div className="flex justify-center">
-            <Button size="sm" onClick={handleConfirm} className="w-24 cursor-pointer">
-              {buttonText}
+            <Button
+              size="sm"
+              onClick={handleConfirm}
+              className="w-24 cursor-pointer"
+              disabled={isLoading}
+            >
+              {isLoading ? '删除中...' : buttonText}
             </Button>
           </div>
         </div>
